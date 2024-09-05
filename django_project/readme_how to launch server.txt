@@ -1,6 +1,6 @@
-How to launch server to test Django app.
+How to launch server to test Django app. You may need the Powershell extension.
 
-1. Run the virtual environment ".venv"
+1. Run the virtual environment ".venv" inside of the django_project folder
     1a. In the terminal, navigate to the .venv folder and enter "$activate" (without quotations)
     1b. You can enter "$deactivate" (without quotations) in the terminal to deactivate the virtual environment.
 
