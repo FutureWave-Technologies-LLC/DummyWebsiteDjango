@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'web_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': '_', #name of the database goes here
+        'NAME': 'ClassProjectDB', 
         'USER': 'FutureWave',
         'PASSWORD': 'Software1',
         'HOST':'localhost',
