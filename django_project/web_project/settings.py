@@ -82,7 +82,7 @@ DATABASES = {
         'NAME': 'ClassProjectDB', 
         'USER': 'FutureWave',
         'PASSWORD': 'Software1',
-        'HOST':'localhost',
+        'HOST':'classprojectserver.database.windows.net',
         'PORT':'3306',
     }
 }
