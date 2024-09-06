@@ -2,7 +2,7 @@ How to launch server to test Django app.
 
 Get the powershell extension for VScode.
 
-Pip install the following:
+Pip install the following in the terminal:
 
 pip install django
 pip install mysqlclient

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'theButton',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'web_project.urls'
 
@@ -79,10 +82,10 @@ WSGI_APPLICATION = 'web_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ClassProjectDB', 
-        'USER': 'FutureWave',
+        'NAME': 'sakila', 
+        'USER': 'root',
         'PASSWORD': 'Software1',
-        'HOST':'classprojectserver.database.windows.net',
+        'HOST':'localhost',
         'PORT':'3306',
     }
 }

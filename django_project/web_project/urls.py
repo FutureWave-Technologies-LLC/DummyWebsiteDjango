@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from theButton.views import getdummydata
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/dummydata/', getdummydata.as_view(), name='getdummydata')
 ]
