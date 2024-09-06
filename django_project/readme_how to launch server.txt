@@ -1,5 +1,13 @@
-How to launch server to test Django app. You may need the Powershell extension. 
-Also make sure to install django, djangorestframework, and django-cors-headers in the terminal using pip install.
+How to launch server to test Django app. 
+
+Get the powershell extension for VScode.
+
+Pip install the following:
+
+pip install django
+pip install mysqlclient
+pip install djangorestframework
+python -m pip install django-cors-headers
 
 1. Run the virtual environment ".venv" inside of the django_project folder
     1a. In the .venv folder, run one of the activate scripts.
