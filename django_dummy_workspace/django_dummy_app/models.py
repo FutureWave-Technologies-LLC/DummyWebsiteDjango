@@ -7,5 +7,5 @@ class dummy_table(models.Model):
     username = models.CharField(max_length=45)
     password = models.CharField(max_length=45)
 
-    def __string__(self):
-        return self.title
+    def __str__(self):
+        return self.username
