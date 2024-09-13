@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://ip-172-31-28-218.us-east-2.compute.internal',
 ]
 
 INSTALLED_APPS = [
@@ -93,9 +94,8 @@ DATABASES = {
         'NAME': 'dummy_db',
         'USER': 'root',
         'PASSWORD': 'Software1',
-        'HOST': 'localhost',
+        'HOST': 'database-1.cdcgakg6ippm.us-east-2.rds.amazonaws.com',
         'PORT': '3306',
-
     }
 }
 
