@@ -50,7 +50,11 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
        'rest_framework.renderers.JSONRenderer',
+       'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+    )
 }
 
 MIDDLEWARE = [
@@ -91,10 +95,10 @@ WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dummy_db',
-        'USER': 'root',
-        'PASSWORD': 'Software1',
-        'HOST': 'localhost',
+        'NAME': 'FutureWaveTechDB',
+        'USER': 'admin',
+        'PASSWORD': 'mjNRFl0z7tFQalVNzW22',
+        'HOST': 'database-1.cdcgakg6ippm.us-east-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
