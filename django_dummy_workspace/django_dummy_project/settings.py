@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_dummy_app',
+    'database',
     'rest_framework',
 ]
 
@@ -94,7 +94,7 @@ DATABASES = {
         'NAME': 'dummy_db',
         'USER': 'root',
         'PASSWORD': 'Software1',
-        'HOST': 'database-1.cdcgakg6ippm.us-east-2.rds.amazonaws.com',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
