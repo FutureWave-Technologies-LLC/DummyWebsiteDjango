@@ -1,6 +1,10 @@
 from django.urls import path
-from .views import get_dummy_data  # Import the view function
+from .views import get_client_info  # Import the view function
+from .views import get_likes
+from .views import update_likes
 
 urlpatterns = [
-    path('dummy-data/', get_dummy_data, name = 'dummy data'),  # Define the URL pattern for your API
+    path('likes/', get_likes, name = 'likes'),
+    path('client-info/', get_client_info, name = 'client info'),  # Define the URL pattern for your API
+    path('update_likes/', update_likes, name = 'update likes'),
 ]
