@@ -91,10 +91,10 @@ WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FutureWaveTechDB',
-        'USER': 'admin',
-        'PASSWORD': 'mjNRFl0z7tFQalVNzW22',
-        'HOST': 'database-1.cdcgakg6ippm.us-east-2.rds.amazonaws.com',
+        'NAME': 'dummy_db',
+        'USER': 'root',
+        'PASSWORD': 'Software1',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
