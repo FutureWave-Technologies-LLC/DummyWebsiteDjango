@@ -31,8 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 CORS_ALLOWED_ORIGINS = [
+    'http://18.222.224.80:3000',
     'http://localhost:3000',
-    #'https://ip-172-31-28-218.us-east-2.compute.internal',
 ]
 
 INSTALLED_APPS = [
