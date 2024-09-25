@@ -47,7 +47,15 @@ def update_likes(request):
     my_user.like_count += 1 #update like count for this user to be like_count + 1
     my_user.save()
     json_data = serializers.serialize('json', [my_user])
-
+    # Return the JSON response
+    return JsonResponse(json_data, safe=False)
+    #from the previous user check the likes_count
+@api_view(['POST'])
+def update_username(request):
+    my_user = users.objects.all().filter(username = "john").first()
+    #my_user.username == input from user goes here
+    my_user.save()
+    json_data = serializers.serialize('json', [my_user])
     # Return the JSON response
     return JsonResponse(json_data, safe=False)
     #from the previous user check the likes_count
