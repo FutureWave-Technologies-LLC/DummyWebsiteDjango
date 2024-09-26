@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
 
+
 @api_view(['GET'])
 def get_messages(request):
     data = messages.objects.all().values()
@@ -31,10 +32,26 @@ def get_personal_pages(request):
     data = personal_pages.objects.all().values()
     return Response(list(data))
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def get_users(request):
-    data = users.objects.all().values()
-    return Response(list(data))
+    if request.method == 'POST':
+        data = request.data
+
+        my_user = users.objects.all().filter(user_id = 0).first()  
+        
+        # my_user = users.objects.create(user_id = '10').last()
+        my_user.username = data.get('username')
+        my_user.password = data.get('password')
+        my_user.status = True
+        my_user.save()
+        json_data = serializers.serialize('json', [my_user])
+
+        # Return the JSON response
+        return JsonResponse(json_data, safe=False)
+        #from the previous user check the likes_count
+    elif request.method == 'GET':
+        data = users.objects.all().values()
+        return Response(list(data))
 
 @api_view(['GET'])
 def get_likes(request):
@@ -52,7 +69,7 @@ def update_likes(request):
     #from the previous user check the likes_count
 @api_view(['POST'])
 def update_username(request):
-    my_user = users.objects.all().filter(username = "john").first()
+    my_user = users.objects.all().filter(username = "John").first()
     #my_user.username == input from user goes here
     my_user.save()
     json_data = serializers.serialize('json', [my_user])
