@@ -21,6 +21,11 @@ class users(models.Model):
     def str(self):
         return self.user_id
 
+#class follows(models.Model):                                       # Not sure how to implement this yet.
+#    follow_id = models.IntegerField(primary_key=True, null=False)
+#    follwer_id = models.ForeignKey(users, on_delete=models.CASCADE)
+#    user = models.ForeignKey(users, on_delete=models.CASCADE)
+
 class personal_pages(models.Model):
     page_id = models.IntegerField(primary_key=True, null=False)
     user = models.ForeignKey(users, on_delete=models.CASCADE)
@@ -31,11 +36,27 @@ class personal_pages(models.Model):
 class posts(models.Model):
     post_id = models.IntegerField(primary_key=True, null=False)
     user = models.ForeignKey(users, on_delete=models.CASCADE)
-    media = models.CharField(max_length=255)
+    media = models.CharField(max_length=255)                        # Remove the media field, media is its own table now - Clifton
     text = models.CharField(max_length=255)
 
     def str(self):
         return self.post_id
+
+class media(models.Model):
+    media_id = models.IntegerField(primary_key=True, null=False)
+    post = models.ForeignKey(posts, on_delete=models.CASCADE)
+    media = models.CharField(max_length=255)
+
+    def str(self):
+        return self.media_id
+
+class likes(models.Model):
+    like_id = models.IntegerField(primary_key=True, null=False)
+    post = models.ForeignKey(posts, on_delete=models.CASCADE)
+    user = models.ForeignKey(users, on_delete=models.CASCADE)
+    
+    def str(self):
+        return self.like_id
 
 class comments(models.Model):
     comment_id = models.IntegerField(primary_key=True, null=False)
