@@ -17,39 +17,36 @@ def home(request):
     return render(request, 'home.html')
 
 # View function for login page
+@api_view(['POST'])
 def login_page(request):
-    # Check if HTTP request method is POST (form submission)
-    if request.method == "POST":
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        # Check if user with the provided username exists
-        if not User.objects.filter(username=username).exists():
-
-            # Display an error message if the username does not exist
-            messages.error(request, 'Invalid Username')
-            return redirect('/login/')
-
-        # Authenticate the user with the provided username and password
-        user = authenticate(username=username, password=password)
-
-        if user is None:
-            # Display an error message if authentication fails (invalid password)
-            messages.error(request, "Invalid Password")
-            return redirect('/login/')
-        else:
-            # Log in the user and redirect to home page upon sign in
-            return redirect('/home/')
+    data = request.data
+    username = data.get('username')
+    password = data.get('password')
+    print("test")
+    #fetching the user from database
+    user = users.objects.filter(username=username).first()
+    if not user:
+        # Display an error message if the username does not exist
+        json_data = {"response": "Username was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+    # Check if user with the provided username exists
+    #if password doesn't match return error
+    if user.password != password:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+    # Log in the user and redirect to home page upon sign in
+    json_data = {"response": "Valid user", "error": False}
+    return JsonResponse(json_data, safe=False)
 
 # View function for registration page
+@api_view(['POST'])
 def register_page(request):
-    # Check if HTTP request method is POST (form submission)
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-    
+    data = request.data
+    username = data.get('username')
+    password = data.get('password')
+
     # Check if user with provided username already exists
-    user = User.objects.filter(username=username)
+    user = users.objects.filter(username=username)
 
     if user.exists():
         # Display information message if username is taken
@@ -57,7 +54,7 @@ def register_page(request):
         return redirect('/register/')
 
     # Create a new User object with the provided information
-    user = user.objects.create_user(
+    user = users.objects.create_user(
         username=username,
     )
 
@@ -68,9 +65,6 @@ def register_page(request):
     # Display information message indicating successful acount creation
     messages.info(request, "Account created Successfully")
     return redirect('/register/')
-
-    # Render the registration page template (GET request)
-    return render(request, 'register.html')
 
 @api_view(['GET'])
 def get_messages(request):
@@ -100,17 +94,23 @@ def get_personal_pages(request):
 @api_view(['GET', 'POST'])
 def get_users(request):
     if request.method == 'POST':
-        data = request.data
-
-        my_user = users.objects.all().filter(user_id = 0).first()  
-        
-        # my_user = users.objects.create(user_id = '10').last()
-        my_user.username = data.get('username')
-        my_user.password = data.get('password')
-        my_user.status = True
-        my_user.save()
-        json_data = serializers.serialize('json', [my_user])
-
+        data = request.data 
+        user = users.objects.filter(username=data.get('username')).first()
+        if user:
+            # Display information message if username is taken
+            json_data = {"response": "Username already exists, please choose another username", "error": True}
+            # Return the JSON response
+            return JsonResponse(json_data, safe=False)
+        if len(data.get('password')) < 4:
+            # Display information message if username is taken
+            json_data = {"response": "Password must be more than 4 characters long", "error": True}
+            # Return the JSON response
+            return JsonResponse(json_data, safe=False)
+        my_user = users.objects.all().count()
+        my_user_info = users(user_id = my_user, username = data.get('username'), password = data.get('password')
+                             ,status = False, first_name = data.get('first_name'), last_name = data.get('last_name'))
+        my_user_info.save()
+        json_data = {"response": "User was created", "error": False}
         # Return the JSON response
         return JsonResponse(json_data, safe=False)
         #from the previous user check the likes_count
