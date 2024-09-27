@@ -90,6 +90,7 @@ WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
 
 DATABASES = {
     'default': {
+        #Info for online database
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FutureWaveTechDB',
         'USER': 'admin',

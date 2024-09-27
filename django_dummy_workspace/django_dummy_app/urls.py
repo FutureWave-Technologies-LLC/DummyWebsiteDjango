@@ -10,4 +10,5 @@ urlpatterns = [
     path('comments/', get_comments, name = 'comments'),
     path('replies/', get_replies, name = 'replies'),
     path('messages/', get_messages, name = 'messages'),
+    path('login_page/', login_page, name = 'login_page')
 ]
