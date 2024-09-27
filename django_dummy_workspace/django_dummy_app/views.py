@@ -37,14 +37,14 @@ def get_users(request):
     if request.method == 'POST':
         data = request.data
 
-        my_user = users.objects.all().filter(user_id = 0).first()  
+        my_user_count = users.objects.all().count()
         
         # my_user = users.objects.create(user_id = '10').last()
-        my_user.username = data.get('username')
-        my_user.password = data.get('password')
-        my_user.status = True
-        my_user.save()
-        json_data = serializers.serialize('json', [my_user])
+        my_user_info = users(user_id = my_user_count, username = data.get('username'), 
+                             password = data.get('password'), status = True, 
+                             first_name = data.get('first_name'), last_name = data.get('last_name'))
+        my_user_info.save()
+        json_data = serializers.serialize('json', [my_user_info])
 
         # Return the JSON response
         return JsonResponse(json_data, safe=False)

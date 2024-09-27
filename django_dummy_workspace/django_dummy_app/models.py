@@ -17,6 +17,8 @@ class users(models.Model):
     username = models.CharField(max_length=15)
     password = models.CharField(max_length=45)
     status = models.BooleanField()
+    first_name = models.CharField(max_length=45)
+    last_name = models.CharField(max_length=45)
 
     def str(self):
         return self.user_id
