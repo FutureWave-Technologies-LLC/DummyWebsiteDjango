@@ -6,6 +6,14 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
 
+from django.contrib.auth.models import User
+
+# validates fields
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = users
+        fields = ['user_id', 'username', 'password']
+
 
 @api_view(['GET'])
 def get_messages(request):
@@ -36,10 +44,16 @@ def get_personal_pages(request):
 def get_users(request):
     if request.method == 'POST':
         data = request.data
-
-        my_user = users.objects.all().filter(user_id = 0).first()  
+        username = data.get('username')
+        password = data.get('password')
         
+        #check if user does not exist
+        if not User.objects.filter(username = username).exists():
+            new_user = User.objects.create_user()
+
+        # my_user = users.objects.all().filter(user_id = 0).first()  
         # my_user = users.objects.create(user_id = '10').last()
+
         my_user.username = data.get('username')
         my_user.password = data.get('password')
         my_user.status = True
