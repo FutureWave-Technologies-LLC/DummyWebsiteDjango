@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -12,7 +13,7 @@ class likes(models.Model):
     def __str__(self):
         return self.name
     
-class users(models.Model):
+class users(models.Model):                                         #Old model for user table, make sure to remove
     user_id = models.IntegerField(primary_key=True, null=False)
     username = models.CharField(max_length=15)
     password = models.CharField(max_length=45)
@@ -23,14 +24,14 @@ class users(models.Model):
 
 class personal_pages(models.Model):
     page_id = models.IntegerField(primary_key=True, null=False)
-    user = models.ForeignKey(users, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def str(self):
         return self.page_id
 
 class posts(models.Model):
     post_id = models.IntegerField(primary_key=True, null=False)
-    user = models.ForeignKey(users, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     media = models.CharField(max_length=255)
     text = models.CharField(max_length=255)
 
@@ -54,7 +55,7 @@ class replies(models.Model):
 
 class messages(models.Model):
     message_id = models.IntegerField(primary_key=True, null=False)
-    user = models.ForeignKey(users, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     reciever_id = models.IntegerField(null=False)
     text = models.CharField(max_length=255)
 

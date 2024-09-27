@@ -1,11 +1,76 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
+# Create your views here.
+
+# View function for home page
+def home(request):
+    return render(request, 'home.html')
+
+# View function for login page
+def login_page(request):
+    # Check if HTTP request method is POST (form submission)
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Check if user with the provided username exists
+        if not User.objects.filter(username=username).exists():
+
+            # Display an error message if the username does not exist
+            messages.error(request, 'Invalid Username')
+            return redirect('/login/')
+
+        # Authenticate the user with the provided username and password
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            # Display an error message if authentication fails (invalid password)
+            messages.error(request, "Invalid Password")
+            return redirect('/login/')
+        else:
+            # Log in the user and redirect to home page upon sign in
+            return redirect('/home/')
+
+# View function for registration page
+def register_page(request):
+    # Check if HTTP request method is POST (form submission)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+    
+    # Check if user with provided username already exists
+    user = User.objects.filter(username=username)
+
+    if user.exists():
+        # Display information message if username is taken
+        messages.info(request, "Username is already taken")
+        return redirect('/register/')
+
+    # Create a new User object with the provided information
+    user = user.objects.create_user(
+        username=username,
+    )
+
+    # Set user's password and save user object
+    user.set_password(password)
+    user.save()
+
+    # Display information message indicating successful acount creation
+    messages.info(request, "Account created Successfully")
+    return redirect('/register/')
+
+    # Render the registration page template (GET request)
+    return render(request, 'register.html')
 
 @api_view(['GET'])
 def get_messages(request):
@@ -77,6 +142,5 @@ def update_username(request):
     return JsonResponse(json_data, safe=False)
     #from the previous user check the likes_count
 
-def home(request):
-        return HttpResponse("Welcome to the Dummy Website API. Visit ' http://localhost:8000/api/dummy-data/ ' to fetch data.")
-# Create your views here.
+#def home(request):
+        #return HttpResponse("Welcome to the Dummy Website API. Visit ' http://localhost:8000/api/dummy-data/ ' to fetch data.")

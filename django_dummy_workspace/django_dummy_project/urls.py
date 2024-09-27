@@ -16,10 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django_dummy_app import views
+from django_dummy_app.views import *     
+from django.conf import settings        # App settings
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns  # Static files servings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # django_dummy_app views
+    # path('admin/', admin.site.urls),
     path('api/', include('django_dummy_app.urls')),
-    path('', views.home, name='home'),
+    # path('', views.home, name='home'),
+    path('home/', home, name="recipes"),                # Home page
+    path("admin/", admin.site.urls),                    # Admin interface
+    path('login/', login_page, name='login_page'),       # Login page
+    path('register/', register_page, name='register'),   # Registration page
 ]
