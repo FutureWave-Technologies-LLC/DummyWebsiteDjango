@@ -16,6 +16,47 @@ from django.contrib.auth.models import User
 def home(request):
     return render(request, 'home.html')
 
+@api_view(['GET', 'POST'])
+def get_users(request):
+    if request.method == 'POST':
+        data = request.data 
+        user = users.objects.filter(username=data.get('username')).first()
+        if user:
+            # Display information message if username is taken
+            json_data = {"response": "Username already exists, please choose another username", "error": True}
+            # Return the JSON response
+            return JsonResponse(json_data, safe=False)
+        if len(data.get('password')) < 4:
+            # Display information message if username is taken
+            json_data = {"response": "Password must be more than 4 characters long", "error": True}
+            # Return the JSON response
+            return JsonResponse(json_data, safe=False)
+        my_user = users.objects.all().count()
+        my_user_info = users(user_id = my_user, username = data.get('username'), password = data.get('password')
+                             ,status = False, first_name = data.get('first_name'), last_name = data.get('last_name'))
+        my_user_info.save()
+        json_data = {"response": "User was created", "error": False}
+        # Return the JSON response
+        return JsonResponse(json_data, safe=False)
+        #from the previous user check the likes_count
+    elif request.method == 'GET':
+        data = users.objects.all().values()
+        return Response(list(data))
+    
+@api_view(['POST'])
+def recieving_posts(request):
+    data = request.data
+    my_post_id = posts.objects.all().count()
+    my_post_info = posts(post_id = my_post_id, media = 'media', text = data.get('postText'), user_id = '9')
+    my_post_info.save()
+    json_data = {"Response": "Post was created", "error": False}
+    return JsonResponse(json_data, safe=False)
+
+@api_view(['GET'])
+def get_post_data(request):
+    data = posts.objects.all().values()
+    return(Response(data))
+
 # View function for login page
 @api_view(['POST'])
 def login_page(request):
@@ -91,33 +132,6 @@ def get_personal_pages(request):
     data = personal_pages.objects.all().values()
     return Response(list(data))
 
-@api_view(['GET', 'POST'])
-def get_users(request):
-    if request.method == 'POST':
-        data = request.data 
-        user = users.objects.filter(username=data.get('username')).first()
-        if user:
-            # Display information message if username is taken
-            json_data = {"response": "Username already exists, please choose another username", "error": True}
-            # Return the JSON response
-            return JsonResponse(json_data, safe=False)
-        if len(data.get('password')) < 4:
-            # Display information message if username is taken
-            json_data = {"response": "Password must be more than 4 characters long", "error": True}
-            # Return the JSON response
-            return JsonResponse(json_data, safe=False)
-        my_user = users.objects.all().count()
-        my_user_info = users(user_id = my_user, username = data.get('username'), password = data.get('password')
-                             ,status = False, first_name = data.get('first_name'), last_name = data.get('last_name'))
-        my_user_info.save()
-        json_data = {"response": "User was created", "error": False}
-        # Return the JSON response
-        return JsonResponse(json_data, safe=False)
-        #from the previous user check the likes_count
-    elif request.method == 'GET':
-        data = users.objects.all().values()
-        return Response(list(data))
-
 @api_view(['GET'])
 def get_likes(request):
     data = likes.objects.all().values()
@@ -127,15 +141,6 @@ def get_likes(request):
 def update_likes(request):
     my_user = likes.objects.filter(email = "email@gmial.com").first()
     my_user.like_count += 1 #update like count for this user to be like_count + 1
-    my_user.save()
-    json_data = serializers.serialize('json', [my_user])
-    # Return the JSON response
-    return JsonResponse(json_data, safe=False)
-    #from the previous user check the likes_count
-@api_view(['POST'])
-def update_username(request):
-    my_user = users.objects.all().filter(username = "John").first()
-    #my_user.username == input from user goes here
     my_user.save()
     json_data = serializers.serialize('json', [my_user])
     # Return the JSON response
