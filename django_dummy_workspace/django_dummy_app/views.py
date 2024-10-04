@@ -47,7 +47,7 @@ def get_users(request):
 def recieving_posts(request):
     data = request.data
     my_post_id = posts.objects.all().count()
-    my_post_info = posts(post_id = my_post_id, media = 'media', text = data.get('postText'), user_id = '9')
+    my_post_info = posts(post_id = my_post_id, media = 'media', text = data.get('postText'), user_id = '9', title = data.get('title'), username = 'usernameGoesHere')
     my_post_info.save()
     json_data = {"Response": "Post was created", "error": False}
     return JsonResponse(json_data, safe=False)
