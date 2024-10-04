@@ -69,7 +69,7 @@ def authenticate_user(request):
         print("password match")
         #temp way to make a token
         token = randrange(1, 10000, 1)
-        json_data = {"user": user.username, "token": token, "error": False}
+        json_data = {"username": user.username, "token": token, "error": False}
         return JsonResponse(json_data, safe=False)
     else:
         json_data = {"response": "Password was not valid", "error": True}
