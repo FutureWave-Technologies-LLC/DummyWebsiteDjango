@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from random import randrange
 
 # Create your views here.
 
@@ -43,6 +44,38 @@ def get_users(request):
         data = users.objects.all().values()
         return Response(list(data))
     
+#Gets a user's data based on username
+@api_view(['GET'])
+def get_user_data(request):
+    data = request.data
+    user = users.objects.filter(username=data.get('username')).first()
+    
+    #TBD: Function that compares password hashes
+    if data.get('password') == user.password:
+        data = user.values()
+        return(Response(data))
+    else:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+    
+#Update token for a user
+@api_view(['POST'])
+def authenticate_user(request):
+    data = request.data
+    user = users.objects.filter(username=data.get('username')).first()
+    
+    #TBD: Function that compares password hashes
+    if data.get('password') == user.password:
+        print("password match")
+        #temp way to make a token
+        token = randrange(1, 10000, 1)
+        json_data = {"user": user.username, "token": token, "error": False}
+        return JsonResponse(json_data, safe=False)
+    else:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+
+    
 @api_view(['POST'])
 def recieving_posts(request):
     data = request.data
@@ -72,6 +105,7 @@ def login_page(request):
         return JsonResponse(json_data, safe=False)
     # Check if user with the provided username exists
     #if password doesn't match return error
+    #TBD: Function that compares password hashes
     if user.password != password:
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False)
