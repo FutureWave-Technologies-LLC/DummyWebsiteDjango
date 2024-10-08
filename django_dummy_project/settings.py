@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_dummy_app',
     'rest_framework',
     'users',
+    'profiles',
 ]
 
 REST_FRAMEWORK = {
