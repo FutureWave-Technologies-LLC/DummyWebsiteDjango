@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_dummy_app',
     'rest_framework',
+    'users',
 ]
 
 REST_FRAMEWORK = {
