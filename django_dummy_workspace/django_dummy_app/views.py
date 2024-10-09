@@ -67,9 +67,10 @@ def authenticate_user(request):
     #TBD: Function that compares password hashes
     if data.get('password') == user.password:
         print("password match")
-        #temp way to make a token
-        token = randrange(1, 10000, 1)
-        json_data = {"username": user.username, "token": token, "error": False}
+        #data to be stored to token by frontend
+        json_data = {"username": user.username,
+                     "token_id": randrange(1, 100000, 1)
+                     }
         return JsonResponse(json_data, safe=False)
     else:
         json_data = {"response": "Password was not valid", "error": True}
