@@ -36,6 +36,8 @@ class posts(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     media = models.CharField(max_length=255)
     text = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    username = models.CharField(max_length=255)
 
     def str(self):
         return self.post_id
