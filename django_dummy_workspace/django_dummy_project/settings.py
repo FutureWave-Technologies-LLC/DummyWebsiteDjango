@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_dummy_app',
     'rest_framework',
+    'channels'
 ]
 
 REST_FRAMEWORK = {
@@ -83,6 +84,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
+
+ASGI_APPLICATION = 'django_dummy_project.asgi.application'
 
 
 # Database

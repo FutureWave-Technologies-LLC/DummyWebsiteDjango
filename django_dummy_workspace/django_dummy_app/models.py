@@ -59,9 +59,10 @@ class replies(models.Model):
 
 class messages(models.Model):
     message_id = models.IntegerField(primary_key=True, null=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    reciever_id = models.IntegerField(null=False)
+    user = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    reciever = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
-    def str(self):
+    def __str__(self):
         return self.message_id
