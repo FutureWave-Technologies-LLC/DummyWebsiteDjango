@@ -29,4 +29,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),                    # Admin interface
     path('login/', login_page, name='login_page'),       # Login page
     path('register/', register_page, name='register'),   # Registration page
+    path('messages/', include('chat.urls'))             # This url does not work
 ]
