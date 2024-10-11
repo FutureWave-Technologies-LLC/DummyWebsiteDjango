@@ -17,5 +17,5 @@ urlpatterns = [
     path('chat_get/', get_chat_info, name ='get_chat_info'),
     path('chat_create/', create_chat, name='create_chat'),
     path('authenticate_user/', authenticate_user, name='users'),
-   path('get_user_data/', get_user_data, name = 'users')
+    path('get_user_data/', get_user_data, name = 'users')
 ]
