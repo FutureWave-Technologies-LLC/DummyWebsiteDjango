@@ -143,6 +143,118 @@ def register_page(request):
     return redirect('/register/')
 
 @api_view(['GET'])
+def get_messages_for_chat(request, chat_id):
+        # Filter messages by chat_id passed in the URL
+        messages_in_chat = messages.objects.filter(chat_id=chat_id)
+
+        # If no messages are found for the chat
+        if not messages_in_chat.exists():
+            json_data = {"response": "No messages found for this chat", "error": True}
+            return JsonResponse(json_data, safe=False)
+
+        # Serialize the messages
+        serializer = MessageSerializer(messages_in_chat, many=True)
+
+        # Return the serialized messages in the desired JSON format
+        json_data = {
+            "response": serializer.data,
+            "error": False
+        }
+        return JsonResponse(json_data, safe=False)
+
+@api_view(['POST'])
+def send_message(request):
+    # Deserialize the incoming message data
+    serializer = MessageSerializer(data=request.data)
+    
+    # If the data is valid, save the new message
+    if serializer.is_valid():
+        serializer.save(sender=request.user)  # Assuming the sender is the logged-in user
+
+        # Return a success response with the created message data
+        json_data = {
+            "response": serializer.data,
+            "error": False
+        }
+        return JsonResponse(json_data, safe=False, status=201)
+
+    # If the data is invalid, return an error response
+    json_data = {
+        "response": serializer.errors,
+        "error": True
+    }
+    return JsonResponse(json_data, safe=False, status=400)
+
+@api_view(['POST'])
+def get_chat_info(request):
+    user1_id = request.data.get('user1_id')
+    user2_id = request.data.get('user2_id')
+
+    # Find chat where both users are participants
+    chats_user1 = chat_participants.objects.filter(user_id=user1_id).values_list('chat_id', flat=True)
+    chats_user2 = chat_participants.objects.filter(user_id=user2_id).values_list('chat_id', flat=True)
+
+    # Find the common chat
+    common_chat = set(chats_user1).intersection(set(chats_user2))
+    if common_chat:
+        chat_id = list(common_chat)[0]  # Assuming only one chat is found between the users
+        chat = Chat.objects.get(id=chat_id)
+        return JsonResponse({"chat_id": chat.id, "created_at": chat.created_at}, status=200)
+    else:
+        return JsonResponse({"error": "No common chat found"}, status=404)
+    
+@api_view(['POST'])
+def create_chat(request):
+    user1_id = request.data.get('user1_id')
+    user2_id = request.data.get('user2_id')
+
+    # Create a new chat
+    chat = Chat.objects.all().count()
+    my_chat = Chat(id = chat)  # adding one to the number of Chat ids
+    my_chat.save()
+
+    # Add both users to the chat_participants table
+    user1 = User.objects.get(id=user1_id)
+    user2 = User.objects.get(id=user2_id)
+
+    chat_participants.objects.create(chat=chat, user=user1)
+    chat_participants.objects.create(chat=chat, user=user2)
+
+    return JsonResponse({"chat_id": chat.id, "created_at": chat.created_at}, status=201)
+
+#Gets a user's data based on username
+@api_view(['GET'])
+def get_user_data(request):
+    data = request.data
+    user = users.objects.filter(username=data.get('username')).first()
+
+    #TBD: Function that compares password hashes
+    if data.get('password') == user.password:
+        data = user.values()
+        return(Response(data))
+    else:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+
+#Update token for a user
+@api_view(['POST'])
+def authenticate_user(request):
+    data = request.data
+    user = users.objects.filter(username=data.get('username')).first()
+
+    #TBD: Function that compares password hashes
+    if data.get('password') == user.password:
+        print("password match")
+        #data to be stored to token by frontend
+        json_data = {"username": user.username,
+                     "token_id": randrange(1, 100000, 1)
+                     }
+        return JsonResponse(json_data, safe=False)
+    else:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+
+@api_view(['GET'])
 def get_messages(request):
     data = messages.objects.all().values()
     return Response(list(data))

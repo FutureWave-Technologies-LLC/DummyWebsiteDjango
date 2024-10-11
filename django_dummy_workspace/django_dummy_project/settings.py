@@ -45,8 +45,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_dummy_app',
     'rest_framework',
-    'chat',
+    'channels'
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1, 6379')],
+        }
+    }
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -84,6 +93,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
+
+ASGI_APPLICATION = 'django_dummy_project.asgi.application'
 
 
 # Database
