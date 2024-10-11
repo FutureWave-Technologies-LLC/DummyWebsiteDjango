@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from random import randrange
 
 # Create your views here.
 
@@ -186,6 +187,38 @@ def create_chat(request):
     chat_participants.objects.create(chat=chat, user=user2)
 
     return JsonResponse({"chat_id": chat.id, "created_at": chat.created_at}, status=201)
+
+#Gets a user's data based on username
+@api_view(['GET'])
+def get_user_data(request):
+    data = request.data
+    user = users.objects.filter(username=data.get('username')).first()
+
+    #TBD: Function that compares password hashes
+    if data.get('password') == user.password:
+        data = user.values()
+        return(Response(data))
+    else:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+
+#Update token for a user
+@api_view(['POST'])
+def authenticate_user(request):
+    data = request.data
+    user = users.objects.filter(username=data.get('username')).first()
+
+    #TBD: Function that compares password hashes
+    if data.get('password') == user.password:
+        print("password match")
+        #data to be stored to token by frontend
+        json_data = {"username": user.username,
+                     "token_id": randrange(1, 100000, 1)
+                     }
+        return JsonResponse(json_data, safe=False)
+    else:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
 
 @api_view(['GET'])
 def get_messages(request):

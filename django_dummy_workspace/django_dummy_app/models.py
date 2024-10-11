@@ -59,7 +59,7 @@ class replies(models.Model):
         return self.reply_id
     
 class Chat(models.Model):
-    id = models.CharField(max_length=255)
+    id = models.IntegerField(primary_key=True, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

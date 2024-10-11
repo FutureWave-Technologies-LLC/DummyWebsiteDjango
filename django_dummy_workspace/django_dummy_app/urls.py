@@ -14,6 +14,8 @@ urlpatterns = [
     path('login_page/', login_page, name = 'login_page'),
     path('messages/chat/<int:chat_id>/', get_messages_for_chat, name = 'getting_messages_for_chat'),
     path('messages/send/', send_message, name='send_message'),
-    path('chat/get/', get_chat_info, name ='get_chat_info'),
-    path('chat/create/', create_chat, name='create_chat'),
+    path('chat_get/', get_chat_info, name ='get_chat_info'),
+    path('chat_create/', create_chat, name='create_chat'),
+    path('authenticate_user/', authenticate_user, name='users'),
+   path('get_user_data/', get_user_data, name = 'users')
 ]
