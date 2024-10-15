@@ -13,13 +13,14 @@ class likes(models.Model):
     def __str__(self):
         return self.name
     
-class users(models.Model):                                         #Old model for user table, make sure to remove
+class users(models.Model):                                         
     user_id = models.IntegerField(primary_key=True, null=False)
     username = models.CharField(max_length=15)
     password = models.CharField(max_length=45)
     status = models.BooleanField()
     first_name = models.CharField(max_length=45)
     last_name = models.CharField(max_length=45)
+    follower_id = models.IntegerField()
 
     def str(self):
         return self.user_id
@@ -65,3 +66,10 @@ class messages(models.Model):
 
     def str(self):
         return self.message_id
+    
+class follow(models.Model):
+    follow_id = models.IntegerField(primary_key=True, null = False)
+    followed_id = models.IntegerField(null=False)
+
+    def str(self):
+        return self.follow_id

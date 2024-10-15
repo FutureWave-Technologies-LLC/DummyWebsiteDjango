@@ -12,7 +12,8 @@ urlpatterns = [
     path('replies/', get_replies, name = 'replies'),
     path('messages/', get_messages, name = 'messages'),
     path('login_page/', login_page, name = 'login_page'),
-
     path('authenticate_user/', authenticate_user, name='users'),
-    path('get_user_data/', get_user_data, name = 'users')
+    path('get_user_data/', get_user_data, name = 'users'),
+    path('following/,', following, name='following'),
+    path('search_users/', search_users, name = 'searching users'),
 ]
