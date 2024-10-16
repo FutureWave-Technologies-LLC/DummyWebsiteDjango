@@ -11,41 +11,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from random import randrange
 
-# Create your views here.
-
 # View function for home page
 def home(request):
     return render(request, 'home.html')
 
-@api_view(['GET', 'POST'])
+#GET ALL DATA FROM 'USERS' MODEL 
+@api_view(['GET'])
 def get_users(request):
-    if request.method == 'POST':
-        data = request.data 
-        user = users.objects.filter(username=data.get('username')).first()
-        if user:
-            # Display information message if username is taken
-            json_data = {"response": "Username already exists, please choose another username", "error": True}
-            # Return the JSON response
-            return JsonResponse(json_data, safe=False)
-        if len(data.get('password')) < 4:
-            # Display information message if username is taken
-            json_data = {"response": "Password must be more than 4 characters long", "error": True}
-            # Return the JSON response
-            return JsonResponse(json_data, safe=False)
-        my_user = users.objects.all().count()
-        my_user_info = users(user_id = my_user, username = data.get('username'), password = data.get('password')
-                             ,status = False, first_name = data.get('first_name'), last_name = data.get('last_name'),
-                             follower_id = my_user)
-        my_user_info.save()
-        json_data = {"response": "User was created", "error": False}
-        # Return the JSON response
-        return JsonResponse(json_data, safe=False)
-        #from the previous user check the likes_count
-    elif request.method == 'GET':
-        data = users.objects.all().values()
-        return Response(list(data))
-    
-#Gets a user's data based on username
+    data = users.objects.all().values()
+    return Response(list(data))
+
+#GET USER'S DATA BASED ON USERNAME
 @api_view(['GET'])
 def get_user_data(request):
     data = request.data
@@ -59,7 +35,7 @@ def get_user_data(request):
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False)
     
-#Update token for a user
+#AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
 @api_view(['POST'])
 def authenticate_user(request):
     data = request.data
@@ -68,7 +44,7 @@ def authenticate_user(request):
     #TBD: Function that compares password hashes
     if data.get('password') == user.password:
         print("password match")
-        #data to be stored to token by frontend
+        #data that the frontend token stores
         json_data = {"username": user.username,
                      "token_id": randrange(1, 100000, 1)
                      }
@@ -77,16 +53,63 @@ def authenticate_user(request):
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False)
 
-    
+#LOGIN USER
 @api_view(['POST'])
-def recieving_posts(request):
+def login_user(request):
     data = request.data
-    my_post_id = posts.objects.all().count()
-    my_post_info = posts(post_id = my_post_id, media = 'media', text = data.get('postText'), user_id = '9', title = data.get('title'), username = 'usernameGoesHere')
-    my_post_info.save()
-    json_data = {"Response": "Post was created", "error": False}
+    username = data.get('username')
+    password = data.get('password')
+    
+    user = users.objects.filter(username=username).first()
+    # username not found
+    if not user:
+        json_data = {"response": "Username was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+    #TBD: Function that compares password hashes
+    if user.password != password:
+        json_data = {"response": "Password was not valid", "error": True}
+        return JsonResponse(json_data, safe=False)
+    
+    # Log in the user and redirect to home page upon sign in
+    json_data = {"response": "Authenticated"+ username, "error": False}
     return JsonResponse(json_data, safe=False)
 
+# SIGN-UP USER
+@api_view(['POST'])
+def signup_user(request):
+    data = request.data 
+    user = users.objects.filter(username=data.get('username')).first()
+    if user:
+        # Return JSON that username is taken
+        json_data = {"response": "Username already exists, please choose another username", "error": True}
+        return JsonResponse(json_data, safe=False)
+    if len(data.get('password')) < 4:
+        # Return JSON that invalid password
+        json_data = {"response": "Password must be more than 4 characters long", "error": True}
+        return JsonResponse(json_data, safe=False)
+    
+    new_user_id = users.objects.all().count()+1
+    new_user_info = users(user_id = new_user_id, username = data.get('username'), password = data.get('password')
+                            ,status = False, first_name = data.get('first_name'), last_name = data.get('last_name'),
+                            follower_id = new_user_id)
+    new_user_info.save()
+    json_data = {"response": "User was created", "error": False}
+    return JsonResponse(json_data, safe=False)
+
+#SEARCH FOR USERS VIA SEARCHBAR
+@api_view(['GET'])
+def search_users(request):
+    data = request.data
+    my_username = data.get('username')
+    username_check = users.objects.filter(username = my_username).first()
+    if username_check:
+        return(Response(my_username))
+    else:
+        #Display information message if user does not exist
+        json_data = {"Response": f"No User found with username: {my_username}", "error": True}
+        return JsonResponse(json_data, safe=False)
+
+#USER FOLLOWS ANOTHER USER
 @api_view(['GET','POST'])
 def following(request):
     #gets data from the frontend
@@ -107,106 +130,56 @@ def following(request):
         my_follow_info = follow(follow_id = my_follow_id, followed_id = following_id)
         my_follow_info.save()
         json_data = {"Response": f"{my_follow_id} successfully followed {following_id}", "error": False}
-        return JsonResponse(json_data, safe=False)
+        return JsonResponse(json_data, safe=False)   
 
-@api_view(['GET'])
-def search_users(request):
-    data = request.data
-    my_username = data.get('username')
-    username_check = users.objects.filter(username = my_username).first()
-    if username_check:
-        return(Response(my_username))
-    else:
-        #Display information message if user does not exist
-        json_data = {"Response": f"No User found with username: {my_username}", "error": True}
-        return JsonResponse(json_data, safe=False)
 
-@api_view(['GET'])
-def get_post_data(request):
-    data = posts.objects.all().values()
-    return(Response(data))
-
-# View function for login page
+#CREATES A POST
 @api_view(['POST'])
-def login_page(request):
+def recieving_posts(request):
     data = request.data
-    username = data.get('username')
-    password = data.get('password')
-    print("test")
-    #fetching the user from database
-    user = users.objects.filter(username=username).first()
-    if not user:
-        # Display an error message if the username does not exist
-        json_data = {"response": "Username was not valid", "error": True}
-        return JsonResponse(json_data, safe=False)
-    # Check if user with the provided username exists
-    #if password doesn't match return error
-    #TBD: Function that compares password hashes
-    if user.password != password:
-        json_data = {"response": "Password was not valid", "error": True}
-        return JsonResponse(json_data, safe=False)
-    # Log in the user and redirect to home page upon sign in
-    json_data = {"response": "Valid user", "error": False}
+    my_post_id = posts.objects.all().count()
+    my_post_info = posts(post_id = my_post_id, media = 'media', text = data.get('postText'), user_id = '9', title = data.get('title'), username = 'usernameGoesHere')
+    my_post_info.save()
+    json_data = {"Response": "Post was created", "error": False}
     return JsonResponse(json_data, safe=False)
 
-# View function for registration page
-@api_view(['POST'])
-def register_page(request):
-    data = request.data
-    username = data.get('username')
-    password = data.get('password')
-
-    # Check if user with provided username already exists
-    user = users.objects.filter(username=username)
-
-    if user.exists():
-        # Display information message if username is taken
-        messages.info(request, "Username is already taken")
-        return redirect('/register/')
-
-    # Create a new User object with the provided information
-    user = users.objects.create_user(
-        username=username,
-    )
-
-    # Set user's password and save user object
-    user.set_password(password)
-    user.save()
-
-    # Display information message indicating successful acount creation
-    messages.info(request, "Account created Successfully")
-    return redirect('/register/')
-
-@api_view(['GET'])
-def get_messages(request):
-    data = messages.objects.all().values()
-    return Response(list(data))
-
-@api_view(['GET'])
-def get_replies(request):
-    data = replies.objects.all().values()
-    return Response(list(data))
-
-@api_view(['GET'])
-def get_comments(request):
-    data = comments.objects.all().values()
-    return Response(list(data))
-
+#GET ALL POSTS DATA
 @api_view(['GET'])
 def get_posts(request):
     data = posts.objects.all().values()
     return Response(list(data))
 
+#GET MESSAGES
+@api_view(['GET'])
+def get_messages(request):
+    data = messages.objects.all().values()
+    return Response(list(data))
+
+#GET REPLIES
+@api_view(['GET'])
+def get_replies(request):
+    data = replies.objects.all().values()
+    return Response(list(data))
+
+#GET COMMENTS
+@api_view(['GET'])
+def get_comments(request):
+    data = comments.objects.all().values()
+    return Response(list(data))
+
+#GET PERSONAL PAGES
 @api_view(['GET'])
 def get_personal_pages(request):
     data = personal_pages.objects.all().values()
     return Response(list(data))
 
+#GET LIKES
 @api_view(['GET'])
 def get_likes(request):
     data = likes.objects.all().values()
     return Response(list(data))
 
+#UPDATE LIKES
 @api_view(['POST'])
 def update_likes(request):
     my_user = likes.objects.filter(email = "email@gmial.com").first()
@@ -216,6 +189,3 @@ def update_likes(request):
     # Return the JSON response
     return JsonResponse(json_data, safe=False)
     #from the previous user check the likes_count
-
-#def home(request):
-        #return HttpResponse("Welcome to the Dummy Website API. Visit ' http://localhost:8000/api/dummy-data/ ' to fetch data.")
