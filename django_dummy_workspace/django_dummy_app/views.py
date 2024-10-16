@@ -97,11 +97,9 @@ def following(request):
     
     check_following_id = follow.objects.filter(follower_id= data.get('following_id')).first()
     check_follow_id = follow.objects.filter(follow_id = data.get('follow_id')).first()
-
-    #if user already follows the other user it will delete the follow, thus unfollowing
     if check_following_id and check_follow_id == my_follow_id and following_id:
         unfollow = follow.objects.filter(following_id = check_following_id).delete()
-        unfollow.save()
+        #unfollow.save()
         json_data = {"Response": f"{my_follow_id} successfully unfollowed {following_id}", "error": False}
         return JsonResponse(json_data, safe=False)
     #if user doesn't follow the other user it will create a new following
@@ -110,17 +108,14 @@ def following(request):
         my_follow_info.save()
         json_data = {"Response": f"{my_follow_id} successfully followed {following_id}", "error": False}
         return JsonResponse(json_data, safe=False)
-    
-@api_view({'GET'})
+
+@api_view(['GET'])
 def search_users(request):
     data = request.data
     my_username = data.get('username')
     username_check = users.objects.filter(username = my_username).first()
     if username_check:
-        # Display information message if user exists
-        json_data = {"Response": "Username exists", "error": False}
-        # Return the JSON response
-        return JsonResponse(json_data, safe=False)
+        return(Response(my_username))
     else:
         #Display information message if user does not exist
         json_data = {"Response": f"No User found with username: {my_username}", "error": True}
