@@ -40,10 +40,9 @@ def get_user_data(request):
 def authenticate_user(request):
     data = request.data
     user = users.objects.filter(username=data.get('username')).first()
-    
+
     #TBD: Function that compares password hashes
     if data.get('password') == user.password:
-        print("password match")
         #data that the frontend token stores
         json_data = {"username": user.username,
                      "token_id": randrange(1, 100000, 1)
@@ -53,25 +52,23 @@ def authenticate_user(request):
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False)
 
-#LOGIN USER
-@api_view(['POST'])
+#SIGN-IN/LOGIN USER
+@api_view(['GET'])
 def login_user(request):
-    data = request.data
-    username = data.get('username')
-    password = data.get('password')
+    request_username = request.GET.get("username")
+    request_password = request.GET.get("password")
     
-    user = users.objects.filter(username=username).first()
+    user = users.objects.filter(username = request_username).first()
     # username not found
     if not user:
-        json_data = {"response": "Username was not valid", "error": True}
+        json_data = {"response": "Username is not valid", "error": True}
         return JsonResponse(json_data, safe=False)
     #TBD: Function that compares password hashes
-    if user.password != password:
-        json_data = {"response": "Password was not valid", "error": True}
+    if user.password != request_password:
+        json_data = {"response": "Password is not valid", "error": True}
         return JsonResponse(json_data, safe=False)
     
-    # Log in the user and redirect to home page upon sign in
-    json_data = {"response": "Authenticated"+ username, "error": False}
+    json_data = {"response": "Successful login for "+user.username, "error": False}
     return JsonResponse(json_data, safe=False)
 
 # SIGN-UP USER
@@ -99,14 +96,16 @@ def signup_user(request):
 #SEARCH FOR USERS VIA SEARCHBAR
 @api_view(['GET'])
 def search_users(request):
-    data = request.data
-    my_username = data.get('username')
-    username_check = users.objects.filter(username = my_username).first()
-    if username_check:
-        return(Response(my_username))
+    query_username = request.GET.get("query")
+    matched_users = []
+    for user in users.objects.all():
+        if (user.username.find(query_username) != -1):
+            matched_users.append({"username": user.username})
+
+    if len(matched_users) > 0:
+        return(Response(matched_users))
     else:
-        #Display information message if user does not exist
-        json_data = {"Response": f"No User found with username: {my_username}", "error": True}
+        json_data = {"Response": f"No matching user found for: {query_username}", "error": True}
         return JsonResponse(json_data, safe=False)
 
 #USER FOLLOWS ANOTHER USER
@@ -137,8 +136,14 @@ def following(request):
 @api_view(['POST'])
 def recieving_posts(request):
     data = request.data
+    
     my_post_id = posts.objects.all().count()
-    my_post_info = posts(post_id = my_post_id, media = 'media', text = data.get('postText'), user_id = '9', title = data.get('title'), username = 'usernameGoesHere')
+    user = users.objects.filter(username=data.get('username')).first()
+
+    my_post_info = posts(post_id = my_post_id, media = 'media', 
+                         text = data.get('postText'), user_id = user.user_id, 
+                         title = data.get('title'), 
+                         username = user.username)
     my_post_info.save()
     json_data = {"Response": "Post was created", "error": False}
     return JsonResponse(json_data, safe=False)
