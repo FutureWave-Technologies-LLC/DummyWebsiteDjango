@@ -31,6 +31,4 @@ urlpatterns = [
     #OTHER
     path('personal_pages/', get_personal_pages, name = 'personal_pages'),
     
-
-    
 ]
