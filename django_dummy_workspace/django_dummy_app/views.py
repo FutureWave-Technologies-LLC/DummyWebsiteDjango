@@ -21,18 +21,16 @@ def get_users(request):
     data = users.objects.all().values()
     return Response(list(data))
 
-#GET USER'S DATA BASED ON USERNAME
+#GET USER'S DATA BASED ON ID
 @api_view(['GET'])
 def get_user_data(request):
-    data = request.data
-    user = users.objects.filter(username=data.get('username')).first()
+    requested_user_id = request.GET.get("user_id")
+    user_data = users.objects.filter(user_id=requested_user_id).values()
     
-    #TBD: Function that compares password hashes
-    if data.get('password') == user.password:
-        data = user.values()
-        return(Response(data))
+    if user_data:
+        return(Response(user_data))
     else:
-        json_data = {"response": "Password was not valid", "error": True}
+        json_data = {"response": "User with this ID cannot be found", "error": True}
         return JsonResponse(json_data, safe=False)
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
@@ -130,6 +128,7 @@ def following(request):
         my_follow_info.save()
         json_data = {"Response": f"{my_follow_id} successfully followed {following_id}", "error": False}
         return JsonResponse(json_data, safe=False)   
+        
 
 
 #CREATES A POST
