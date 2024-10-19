@@ -132,8 +132,9 @@ def followers(request):
             return JsonResponse(json_data, safe=False)   
     #RETURNS LIST OF USER'S FOLLOWERS
     elif request.method == 'GET':
+        request_user_id = request.GET.get("user_id")
         #TODO:
-        pass
+        return JsonResponse({"Response": 1111}, safe=False)
         
 
 
