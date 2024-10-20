@@ -107,6 +107,7 @@ def search_users(request):
         return JsonResponse(json_data, safe=False)
 
 #API FOR FOLLOWERS
+'''
 @api_view(['GET','POST'])
 def followers(request):
     #USER FOLLOWS ANOTHER USER
@@ -117,7 +118,7 @@ def followers(request):
         my_follow_id = data.get('user_follower_id') # is the user's follower_id
         following_id = data.get('following_id') # is the other user's follower_id they are trying to follow
         
-        check_following_id = follow.objects.filter(follower_id= data.get('following_id')).first()
+        check_following_id = follow.objects.filter(followed_id= data.get('following_id')).first()
         check_follow_id = follow.objects.filter(follow_id = data.get('follow_id')).first()
         if check_following_id and check_follow_id == my_follow_id and following_id:
             unfollow = follow.objects.filter(following_id = check_following_id).delete()
@@ -135,7 +136,52 @@ def followers(request):
         request_user_id = request.GET.get("user_id")
         #TODO:
         return JsonResponse({"Response": 1111}, safe=False)
-        
+'''
+@api_view(['GET', 'POST'])
+def followers(request):
+    if request.method == 'POST':
+        data = request.data
+        my_follow_id = data.get('user_follower_id')  # ID of the logged-in user
+        username_to_follow = data.get('following_id')  # Username of the user they want to follow
+
+        # Fetch the user ID of the user they want to follow using their username
+        try:
+            user_to_follow = users.objects.get(username=username_to_follow)
+        except users.DoesNotExist:
+            return JsonResponse({"Response": f"User '{username_to_follow}' does not exist.", "error": True}, safe=False)
+
+        following_id = user_to_follow.user_id  # Use 'user_id' since it is the primary key
+
+        # Check if the follow relationship already exists
+        existing_follow = follow.objects.filter(follow_id=my_follow_id, followed_id=following_id).first()
+
+        if existing_follow:
+            # Unfollow if already following
+            existing_follow.delete()
+            return JsonResponse({"Response": f"{my_follow_id} successfully unfollowed {following_id}", "error": False}, safe=False)
+        else:
+            # Follow if not already following
+            new_follow = follow(follow_id=my_follow_id, followed_id=following_id)
+            new_follow.save()
+            return JsonResponse({"Response": f"{my_follow_id} successfully followed {following_id}", "error": False}, safe=False)
+
+    elif request.method == 'GET':
+        my_follow_id = request.GET.get('user_follower_id')
+        username_to_check = request.GET.get('following_id')
+
+        # Fetch the user ID of the user they want to check follow status
+        try:
+            user_to_check = users.objects.get(username=username_to_check)
+        except users.DoesNotExist:
+            return JsonResponse({"Response": f"User '{username_to_check}' does not exist.", "error": True}, safe=False)
+
+        following_id = user_to_check.user_id
+
+        # Check if the logged-in user is following the target user
+        is_following = follow.objects.filter(follow_id=my_follow_id, followed_id=following_id).exists()
+
+        return JsonResponse({"is_following": is_following}, safe=False)
+
 
 
 #CREATES A POST
