@@ -9,7 +9,8 @@ urlpatterns = [
     path('search_users/', search_users, name = 'searching users'),
 
     #FOLLOW
-    path('followers/', followers, name='follow'),
+    path('following/', following, name='follow'),
+    path('get_followers/', get_followers, name='follow'),
 
     #POST RELATED
     path('posts/', get_posts, name = 'posts'),
