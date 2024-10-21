@@ -25,10 +25,11 @@ def get_users(request):
 @api_view(['GET'])
 def get_user_data(request):
     requested_user_id = request.GET.get("user_id")
-    user_data = users.objects.filter(user_id=requested_user_id).values()
+    user = users.objects.filter(user_id = requested_user_id).first()
     
-    if user_data:
-        return(Response(user_data))
+    if user:
+        json_data = {"username": user.username, "user_id": user.user_id, "error": False}
+        return JsonResponse(json_data, safe=False)
     else:
         json_data = {"response": "User with this ID cannot be found", "error": True}
         return JsonResponse(json_data, safe=False)
@@ -43,6 +44,7 @@ def authenticate_user(request):
     if data.get('password') == user.password:
         #data that the frontend token stores
         json_data = {"username": user.username,
+                     "user_id": user.user_id,
                      "token_id": randrange(1, 100000, 1)
                      }
         return JsonResponse(json_data, safe=False)
@@ -98,7 +100,7 @@ def search_users(request):
     matched_users = []
     for user in users.objects.all():
         if (user.username.find(query_username) != -1):
-            matched_users.append({"username": user.username})
+            matched_users.append({"username": user.username, "user_id": user.user_id})
 
     if len(matched_users) > 0:
         return(Response(matched_users))
@@ -106,82 +108,76 @@ def search_users(request):
         json_data = {"Response": f"No matching user found for: {query_username}", "error": True}
         return JsonResponse(json_data, safe=False)
 
-#API FOR FOLLOWERS
-'''
+#API FOR FOLLOWING
 @api_view(['GET','POST'])
-def followers(request):
+def following(request):
     #USER FOLLOWS ANOTHER USER
     if request.method == 'POST':
-        #gets data from the frontend
-        data = request.data
-        # temp values for the frontend, change the 'user_following_id' and 'following_id' to value specified in the frontend
-        my_follow_id = data.get('user_follower_id') # is the user's follower_id
-        following_id = data.get('following_id') # is the other user's follower_id they are trying to follow
+        data = request.data 
+        request_username_to_follow = data.get("username_to_follow")
+        request_follower_id = data.get("follower_id")
+
+        #USER TO FOLLOW
+        user_to_follow = users.objects.filter(username = request_username_to_follow).first()
+        to_follow_username = user_to_follow.username
+        to_follow_id = user_to_follow.user_id
         
-        check_following_id = follow.objects.filter(followed_id= data.get('following_id')).first()
-        check_follow_id = follow.objects.filter(follow_id = data.get('follow_id')).first()
-        if check_following_id and check_follow_id == my_follow_id and following_id:
-            unfollow = follow.objects.filter(following_id = check_following_id).delete()
-            #unfollow.save()
-            json_data = {"Response": f"{my_follow_id} successfully unfollowed {following_id}", "error": False}
+        #GET FOLLOWS WITH THE ID OF FOLLOWER (WHO SENT FROM REQUEST) 
+        follows_with_follower = follow.objects.filter(follower_id = request_follower_id)
+        isFollowing = False
+        primary_key = -1
+
+        #CHECK IN EACH FOLLOW IF HAVE ID OF USER TO FOLLOW
+        if follows_with_follower:
+            for follow_with_follower in follows_with_follower:
+                if follow_with_follower.followee_id == to_follow_id:
+                    isFollowing = True
+                    primary_key = follow_with_follower.primary_key
+                    break
+        
+        #USER HAS FOLLOWED USER
+        if isFollowing:
+            current_follow = follow.objects.filter(primary_key = primary_key).first()
+            current_follow.delete()
+            json_data = {"Response": f"{request_follower_id} unfollowed {to_follow_id} ({to_follow_username})", 
+                         "Followed": False,
+                         "error": False,}
             return JsonResponse(json_data, safe=False)
-        #if user doesn't follow the other user it will create a new following
+        
+        #USER HAS NOT FOLLOWED USER OR NOT FOLLOWED AT ALL
         else:
-            my_follow_info = follow(follow_id = my_follow_id, followed_id = following_id)
-            my_follow_info.save()
-            json_data = {"Response": f"{my_follow_id} successfully followed {following_id}", "error": False}
-            return JsonResponse(json_data, safe=False)   
-    #RETURNS LIST OF USER'S FOLLOWERS
+            #PRIMARY KEY IS THE TWO IDS CONCATED
+            #ID: 1 Follows ID:2 --> 12
+            new_primary_key = int(str(request_follower_id)+str(to_follow_id))
+            new_follow_info = follow(primary_key = new_primary_key,
+                                     follower_id = request_follower_id,
+                                     followee_id = to_follow_id)
+            new_follow_info.save()
+            json_data = {"Response": f"{request_follower_id} followed {to_follow_id} ({to_follow_username})", 
+                         "Followed": True,
+                         "error": False,}
+            return JsonResponse(json_data, safe=False)
+           
+    #RETURNS LIST OF USER'S FOLLOWEES
     elif request.method == 'GET':
-        request_user_id = request.GET.get("user_id")
-        #TODO:
-        return JsonResponse({"Response": 1111}, safe=False)
-'''
-@api_view(['GET', 'POST'])
-def followers(request):
-    if request.method == 'POST':
-        data = request.data
-        my_follow_id = data.get('user_follower_id')  # ID of the logged-in user
-        username_to_follow = data.get('following_id')  # Username of the user they want to follow
-
-        # Fetch the user ID of the user they want to follow using their username
-        try:
-            user_to_follow = users.objects.get(username=username_to_follow)
-        except users.DoesNotExist:
-            return JsonResponse({"Response": f"User '{username_to_follow}' does not exist.", "error": True}, safe=False)
-
-        following_id = user_to_follow.user_id  # Use 'user_id' since it is the primary key
-
-        # Check if the follow relationship already exists
-        existing_follow = follow.objects.filter(follow_id=my_follow_id, followed_id=following_id).first()
-
-        if existing_follow:
-            # Unfollow if already following
-            existing_follow.delete()
-            return JsonResponse({"Response": f"{my_follow_id} successfully unfollowed {following_id}", "error": False}, safe=False)
-        else:
-            # Follow if not already following
-            new_follow = follow(follow_id=my_follow_id, followed_id=following_id)
-            new_follow.save()
-            return JsonResponse({"Response": f"{my_follow_id} successfully followed {following_id}", "error": False}, safe=False)
-
-    elif request.method == 'GET':
-        my_follow_id = request.GET.get('user_follower_id')
-        username_to_check = request.GET.get('following_id')
-
-        # Fetch the user ID of the user they want to check follow status
-        try:
-            user_to_check = users.objects.get(username=username_to_check)
-        except users.DoesNotExist:
-            return JsonResponse({"Response": f"User '{username_to_check}' does not exist.", "error": True}, safe=False)
-
-        following_id = user_to_check.user_id
-
-        # Check if the logged-in user is following the target user
-        is_following = follow.objects.filter(follow_id=my_follow_id, followed_id=following_id).exists()
-
-        return JsonResponse({"is_following": is_following}, safe=False)
-
+        request_follower_id = request.GET.get("user_id")
+        follows_with_follower = follow.objects.filter(follower_id = request_follower_id)
+        followings = []
+        for follow_with_follower in follows_with_follower:
+            followee = users.objects.filter(user_id = follow_with_follower.followee_id).first()
+            followings.append({"username": followee.username, "id":followee.user_id})
+        return(Response(followings))
+    
+#API FOR RETURNS LIST OF A USER'S FOLLOWERS
+@api_view(['GET'])
+def get_followers(request): 
+    request_user_id = request.GET.get("user_id")
+    follows_with_followee = follow.objects.filter(followee_id = request_user_id)
+    followings = []
+    for follow_with_followee in follows_with_followee:
+        follower = users.objects.filter(user_id = follow_with_followee.follower_id).first()
+        followings.append({"username": follower.username, "id":follower.user_id})
+    return(Response(followings))
 
 
 #CREATES A POST
