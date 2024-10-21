@@ -68,8 +68,9 @@ class messages(models.Model):
         return self.message_id
     
 class follow(models.Model):
-    follow_id = models.IntegerField(primary_key=True, null = False)
-    followed_id = models.IntegerField(null=False)
+    primary_key = models.IntegerField(primary_key=True, null = False)
+    follower_id = models.IntegerField(null=False)
+    followee_id = models.IntegerField(null=False)
 
     def str(self):
         return self.follow_id
