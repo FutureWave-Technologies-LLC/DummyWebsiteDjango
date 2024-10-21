@@ -146,9 +146,12 @@ def following(request):
         
         #USER HAS NOT FOLLOWED USER OR NOT FOLLOWED AT ALL
         else:
-            #PRIMARY KEY IS THE TWO IDS CONCATED
-            #ID: 1 Follows ID:2 --> 12
-            new_primary_key = int(str(request_follower_id)+str(to_follow_id))
+            #PRIMARY KEY IS THE LAST FOLLOW'S PRIMARY KEY+1
+            new_primary_key = -1
+            if (follow.objects.last()):
+                new_primary_key = follow.objects.last().primary_key + 1
+            else:
+                new_primary_key = 0
             new_follow_info = follow(primary_key = new_primary_key,
                                      follower_id = request_follower_id,
                                      followee_id = to_follow_id)
