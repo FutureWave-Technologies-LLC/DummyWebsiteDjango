@@ -35,18 +35,25 @@ def get_user_data(request):
         return JsonResponse(json_data, safe=False)
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
+from random import randrange
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from .models import users  # Assuming 'users' is your user model
+
 @api_view(['POST'])
 def authenticate_user(request):
     data = request.data
+    # Find the user by username
     user = users.objects.filter(username=data.get('username')).first()
 
-    #TBD: Function that compares password hashes
-    if data.get('password') == user.password:
-        #data that the frontend token stores
-        json_data = {"username": user.username,
-                     "user_id": user.user_id,
-                     "token_id": randrange(1, 100000, 1)
-                     }
+    # Check if user exists and compare passwords (you should hash and compare passwords in a secure way)
+    if user and data.get('password') == user.password:
+        # Generate token with user_id and username, add token_id for additional use
+        json_data = {
+            "username": user.username,
+            "user_id": user.user_id,  # Include user_id here
+            "token_id": randrange(1, 100000)  # Random token ID (you could replace this with a real token if needed)
+        }
         return JsonResponse(json_data, safe=False)
     else:
         json_data = {"response": "Password was not valid", "error": True}
@@ -182,6 +189,12 @@ def get_followers(request):
         followings.append({"username": follower.username, "id":follower.user_id})
     return(Response(followings))
 
+#GETS PROFILE POSTS
+@api_view(['GET'])
+def profile_posts(request):
+    username = request.GET.get('username')
+    post = posts.objects.filter(username=username).values()  # Assuming posts have a 'username' field
+    return JsonResponse(list(post), safe=False)
 
 #CREATES A POST
 @api_view(['POST'])
