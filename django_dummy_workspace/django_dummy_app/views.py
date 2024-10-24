@@ -168,7 +168,7 @@ def following(request):
         followings = []
         for follow_with_follower in follows_with_follower:
             followee = users.objects.filter(user_id = follow_with_follower.followee_id).first()
-            followings.append({"username": followee.username, "id":followee.user_id})
+            followings.append({"username": followee.username, "user_id":followee.user_id})
         return(Response(followings))
     
 #API FOR RETURNS LIST OF A USER'S FOLLOWERS
@@ -179,7 +179,7 @@ def get_followers(request):
     followings = []
     for follow_with_followee in follows_with_followee:
         follower = users.objects.filter(user_id = follow_with_followee.follower_id).first()
-        followings.append({"username": follower.username, "id":follower.user_id})
+        followings.append({"username": follower.username, "user_id":follower.user_id})
     return(Response(followings))
 
 
