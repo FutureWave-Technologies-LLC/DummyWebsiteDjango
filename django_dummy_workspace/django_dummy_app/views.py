@@ -201,7 +201,7 @@ def profile_posts(request):
 def recieving_posts(request):
     data = request.data
     
-    my_post_id = posts.objects.all().count()
+    my_post_id = posts.objects.all().count()+1
     user = users.objects.filter(username=data.get('username')).first()
 
     my_post_info = posts(post_id = my_post_id, media = 'media', 
