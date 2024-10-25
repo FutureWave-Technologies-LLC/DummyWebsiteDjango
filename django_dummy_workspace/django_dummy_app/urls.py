@@ -14,6 +14,7 @@ urlpatterns = [
 
     #POST RELATED
     path('posts/', get_posts, name = 'posts'),
+    path('get_post/', get_post, name = 'post'),
     path('recieving_posts/', recieving_posts, name = 'getting_post_data'),
     path('profile_posts/', profile_posts, name = 'profile posts'),
 
