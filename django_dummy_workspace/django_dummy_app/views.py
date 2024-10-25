@@ -218,6 +218,23 @@ def get_posts(request):
     data = posts.objects.all().values()
     return Response(list(data))
 
+#GET ALL DATA FOR A POST BASED ON ID
+@api_view(['GET'])
+def get_post(request):
+    post = posts.objects.filter(post_id=request.GET.get('post_id')).first()  # Assuming posts have a 'username' field
+    
+    if post:
+        json_data = {"post_id": post.post_id, 
+                     "title": post.title, 
+                     "text": post.text,
+                     "username":post.username,
+                     "user_id": post.user_id,
+                     "media": post.media}
+        return JsonResponse(json_data, safe=False)
+    else:
+        json_data = {"response": "Post with this ID cannot be found", "error": True}
+        return JsonResponse(json_data, safe=False)
+
 #GET MESSAGES
 @api_view(['GET'])
 def get_messages(request):
