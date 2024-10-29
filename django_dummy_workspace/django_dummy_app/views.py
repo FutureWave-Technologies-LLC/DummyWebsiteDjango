@@ -255,7 +255,9 @@ def get_comments(request):
         comments_of_post = comments.objects.filter(post_id = request_post_id)
         for comment in comments_of_post:
             user = users.objects.filter(user_id = comment.user_id).first()
-            comment_feed.append({"username": user.username, "comment": comment.comment})
+            comment_feed.append({"username": user.username, 
+                                 "user_id": user.user_id,
+                                 "comment": comment.comment})
         return Response(comment_feed)
     #CREATE NEW COMMENT
     elif request.method == 'POST':
