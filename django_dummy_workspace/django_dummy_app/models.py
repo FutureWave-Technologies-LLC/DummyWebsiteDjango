@@ -45,15 +45,19 @@ class posts(models.Model):
 
 class comments(models.Model):
     comment_id = models.IntegerField(primary_key=True, null=False)
-    post = models.ForeignKey(posts, on_delete=models.CASCADE)
-    text = models.CharField(max_length=255)
+    user_id = models.IntegerField(null=False)
+    post_id = models.IntegerField(null=False)
+    comment = models.CharField(max_length=255)
+    # post = models.ForeignKey(posts, on_delete=models.CASCADE)
 
     def str(self):
         return self.comment_id
 
 class replies(models.Model):
     reply_id = models.IntegerField(primary_key=True, null=False)
-    text = models.CharField(max_length=255)
+    user_id = models.IntegerField(null=False)
+    comment_id = models.IntegerField(null=False)
+    reply = models.CharField(max_length=255)
 
     def str(self):
         return self.reply_id
