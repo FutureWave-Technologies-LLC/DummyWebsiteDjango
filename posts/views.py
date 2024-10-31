@@ -2,16 +2,10 @@ from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
+from ..users.models import users
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from random import randrange
-
-# Create your views here.
 
 #CREATES A POST
 @api_view(['POST'])
@@ -39,7 +33,7 @@ def get_posts(request):
 @api_view(['GET'])
 def get_post(request):
     post = posts.objects.filter(post_id=request.GET.get('post_id')).first()  # Assuming posts have a 'username' field
-    
+    print("hi imm running")
     if post:
         json_data = {"post_id": post.post_id, 
                      "title": post.title, 
@@ -58,11 +52,35 @@ def get_replies(request):
     data = replies.objects.all().values()
     return Response(list(data))
 
-#GET COMMENTS
-@api_view(['GET'])
+#COMMENTS API
+@api_view(['GET','POST'])
 def get_comments(request):
-    data = comments.objects.all().values()
-    return Response(list(data))
+    #GET COMMENT FEED BASED ON POST ID
+    if request.method == 'GET':
+        request_post_id = request.GET.get("post_id")
+        comment_feed = []
+        comments_of_post = comments.objects.filter(post_id = request_post_id)
+        for comment in comments_of_post:
+            user = users.objects.filter(user_id = comment.user_id).first()
+            comment_feed.append({"username": user.username, 
+                                 "user_id": user.user_id,
+                                 "comment": comment.comment})
+        return Response(comment_feed)
+    #CREATE NEW COMMENT
+    elif request.method == 'POST':
+        request_user_id = request.data.get("user_id")
+        request_post_id = request.data.get("post_id")
+        request_comment = request.data.get("comment")
+
+        new_primary_key = 0
+        if (comments.objects.last()):
+            new_primary_key = comments.objects.last().comment_id + 1
+        comment_info = comments(comment_id = new_primary_key,
+                                user_id = request_user_id,
+                                post_id = request_post_id,
+                                comment = request_comment)
+        comment_info.save()
+        return JsonResponse({"Response": "Commented created"}, safe=False)
 
 #GET LIKES
 @api_view(['GET'])
