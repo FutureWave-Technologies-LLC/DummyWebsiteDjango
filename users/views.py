@@ -11,8 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from random import randrange
 
-# Create your views here.
-
 #GET ALL DATA FROM 'USERS' MODEL 
 @api_view(['GET'])
 def get_users(request):
@@ -33,11 +31,6 @@ def get_user_data(request):
         return JsonResponse(json_data, safe=False)
 
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
-from random import randrange
-from django.http import JsonResponse
-from rest_framework.decorators import api_view
-from .models import users
-
 @api_view(['POST'])
 def authenticate_user(request):
     data = request.data
@@ -97,3 +90,18 @@ def signup_user(request):
     new_user_info.save()
     json_data = {"response": "User was created", "error": False}
     return JsonResponse(json_data, safe=False)
+
+#SEARCH FOR USERS VIA SEARCHBAR
+@api_view(['GET'])
+def search_users(request):
+    query_username = request.GET.get("query")
+    matched_users = []
+    for user in users.objects.all():
+        if (user.username.find(query_username) != -1):
+            matched_users.append({"username": user.username, "user_id": user.user_id})
+
+    if len(matched_users) > 0:
+        return(Response(matched_users))
+    else:
+        json_data = {"Response": f"No matching user found for: {query_username}", "error": True}
+        return JsonResponse(json_data, safe=False)
