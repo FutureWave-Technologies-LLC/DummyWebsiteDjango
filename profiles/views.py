@@ -2,35 +2,9 @@ from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
+from ..users.models import users
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.core import serializers
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from random import randrange
-
-# Create your views here.
-
-# View function for home page
-def home(request):
-    return render(request, 'home.html')
-
-#SEARCH FOR USERS VIA SEARCHBAR
-@api_view(['GET'])
-def search_users(request):
-    query_username = request.GET.get("query")
-    matched_users = []
-    for user in users.objects.all():
-        if (user.username.find(query_username) != -1):
-            matched_users.append({"username": user.username, "user_id": user.user_id})
-
-    if len(matched_users) > 0:
-        return(Response(matched_users))
-    else:
-        json_data = {"Response": f"No matching user found for: {query_username}", "error": True}
-        return JsonResponse(json_data, safe=False)
 
 #API FOR FOLLOWING
 @api_view(['GET','POST'])
