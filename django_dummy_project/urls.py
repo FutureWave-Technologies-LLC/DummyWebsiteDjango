@@ -21,9 +21,9 @@ from django.conf import settings        # App settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns  # Static files servings
 
 urlpatterns = [
-    path('api/', include('django_dummy_app.urls')),
-    path('home/', home, name="recipes"),                # Home page
-    path("admin/", admin.site.urls),                    # Admin interface
+    #path('api/', include('django_dummy_app.urls')),
+    #path('home/', home, name="recipes"),                # Home page
+    #path("admin/", admin.site.urls),                    # Admin interface
     #path('', include('users.urls'))                    # Url patterns for users app, I'm not sure how to set this up yet
     
     # Unused url patterns
