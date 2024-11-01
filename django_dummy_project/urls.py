@@ -32,4 +32,6 @@ urlpatterns = [
     # path('login/', login_page, name='login_page'),       # Login page
     # path('register/', register_page, name='register'),   # Registration page
     # path('', views.home, name='home'),
+    path('post/', include('posts.urls')),
+    path('users/', include('users.urls')),
 ]
