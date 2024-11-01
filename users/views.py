@@ -22,7 +22,7 @@ def get_users(request):
 def get_user_data(request):
     requested_user_id = request.GET.get("user_id")
     user = users.objects.filter(user_id = requested_user_id).first()
-    
+    print("getting user data")
     if user:
         json_data = {"username": user.username, "user_id": user.user_id, "error": False}
         return JsonResponse(json_data, safe=False)
