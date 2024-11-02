@@ -28,6 +28,7 @@ urlpatterns = [
     path('messages/', get_messages, name = 'messages'),
     path('get_messages/', get_user_messages, name='get_messages'),
     path('send_messages/', send_message, name='send_message'),
+    path('test1/', test1, name = 'test1'),
 
     #LOGIN/SIGN-UP
     path('login/', login_user, name = 'login'),

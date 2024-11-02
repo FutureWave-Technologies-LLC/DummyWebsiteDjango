@@ -43,6 +43,14 @@ def get_user_messages(request):
     serializer = MessageSerializer(user_messages, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def test1(request):
+    user = request.user
+    # Filter messages where the user is either the sender or the receiver
+    user_messages = messages.objects.filter(user=user) | messages.objects.filter(reciever_id=user.id)
+    serializer = MessageSerializer(user_messages, many=True)
+    return Response(serializer.data)
+
 #SEND MESSAGES
 @api_view(['POST'])
 def send_message(request):
