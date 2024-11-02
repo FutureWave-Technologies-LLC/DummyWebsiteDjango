@@ -37,6 +37,7 @@ CORS_ALLOWED_ORIGINS = [
 
 INSTALLED_APPS = [
     'corsheaders',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -83,6 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
+ASGI_APPLICATION = 'django_dummy_project.asgi.application'
 
 
 # Database

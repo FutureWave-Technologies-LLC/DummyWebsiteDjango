@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from .serializers import MessageSerializer
 from random import randrange
 
 # View function for home page
@@ -33,6 +34,26 @@ def get_user_data(request):
     else:
         json_data = {"response": "User with this ID cannot be found", "error": True}
         return JsonResponse(json_data, safe=False)
+    
+#GET MESSAGES
+@api_view(['GET'])
+def get_user_messages(request):
+    user = request.user
+    user_messages = messages.objects.filter(user=user) | messages.objects.filter(reciever_id=user.id)
+    serializer = MessageSerializer(user_messages, many=True)
+    return Response(serializer.data)
+
+#SEND MESSAGES
+@api_view(['POST'])
+def send_message(request):
+    data = request.data.copy()
+    data['user'] = request.user.id  # Automatically set the sender as the logged-in user
+
+    serializer = MessageSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
 from random import randrange
