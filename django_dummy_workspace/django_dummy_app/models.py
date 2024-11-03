@@ -1,7 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+import uuid
+
 # Create your models here.
+
+def generate_message_id():
+    while True:
+        id = uuid.uuid4()
+        if messages.objects.filter(message_id=id).count() == 0:
+            break
+
+    return id
+
 
 class likes(models.Model):
     id = models.IntegerField(primary_key=True, null=False)
@@ -59,8 +70,8 @@ class replies(models.Model):
         return self.reply_id
 
 class messages(models.Model):
-    message_id = models.IntegerField(primary_key=True, null=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message_id = models.IntegerField(primary_key=True, default=generate_message_id, unique=True, null=False)
+    user_id = models.IntegerField(null=False)
     reciever_id = models.IntegerField(null=False)
     text = models.CharField(max_length=255)
 
