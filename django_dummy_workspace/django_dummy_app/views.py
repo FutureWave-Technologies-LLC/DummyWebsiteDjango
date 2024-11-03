@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
@@ -54,14 +55,13 @@ def test1(request):
 #SEND MESSAGES
 @api_view(['POST'])
 def send_message(request):
-    data = request.data.copy()
-    data['user'] = request.user.id  # Automatically set the sender as the logged-in user
+    serializer_class = MessageSerializer
+    serializer = serializer_class(data=request.data)
 
-    serializer = MessageSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
 from random import randrange
