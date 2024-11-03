@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class likes(models.Model):
-    id = models.IntegerField(primary_key=True, null=False)
+    id = models.AutoField(primary_key=True, null=False)
     name = models.CharField(max_length=45)
     email = models.CharField(max_length=45)
     comment = models.CharField(max_length=45)
@@ -14,26 +14,26 @@ class likes(models.Model):
         return self.name
     
 class users(models.Model):                                         
-    user_id = models.IntegerField(primary_key=True, null=False)
+    user_id = models.AutoField(primary_key=True, null=False)
     username = models.CharField(max_length=15)
     password = models.CharField(max_length=45)
-    status = models.BooleanField()
+    status = models.BooleanField(default=False)
     first_name = models.CharField(max_length=45)
     last_name = models.CharField(max_length=45)
-    follower_id = models.IntegerField()
+    follower_id = models.IntegerField(default=0)
 
     def str(self):
         return self.user_id
 
 class personal_pages(models.Model):
-    page_id = models.IntegerField(primary_key=True, null=False)
+    page_id = models.AutoField(primary_key=True, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def str(self):
         return self.page_id
 
 class posts(models.Model):
-    post_id = models.IntegerField(primary_key=True, null=False)
+    post_id = models.AutoField(primary_key=True, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     media = models.CharField(max_length=255)
     text = models.CharField(max_length=255)
@@ -44,7 +44,7 @@ class posts(models.Model):
         return self.post_id
 
 class comments(models.Model):
-    comment_id = models.IntegerField(primary_key=True, null=False)
+    comment_id = models.AutoField(primary_key=True, null=False)
     post = models.ForeignKey(posts, on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
 
@@ -52,7 +52,7 @@ class comments(models.Model):
         return self.comment_id
 
 class replies(models.Model):
-    reply_id = models.IntegerField(primary_key=True, null=False)
+    reply_id = models.AutoField(primary_key=True, null=False)
     text = models.CharField(max_length=255)
 
     def str(self):
@@ -68,7 +68,7 @@ class messages(models.Model):
         return self.message_id
     
 class follow(models.Model):
-    primary_key = models.IntegerField(primary_key=True, null = False)
+    primary_key = models.AutoField(primary_key=True, null = False)
     follower_id = models.IntegerField(null=False)
     followee_id = models.IntegerField(null=False)
 
