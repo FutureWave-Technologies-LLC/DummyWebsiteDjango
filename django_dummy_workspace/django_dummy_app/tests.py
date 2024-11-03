@@ -66,7 +66,7 @@ class AuthenticateUserTestCase(TestCase):
 
 class SignupUserTestCase(TestCase):
     def test_signup_user_valid(self):
-        response = self.client.post(reverse('signup_user'), {
+        response = self.client.post(reverse('sign_up'), {
             'username': 'newuser', 'password': 'validpass',
             'first_name': 'John', 'last_name': 'Doe'
         })
@@ -75,7 +75,7 @@ class SignupUserTestCase(TestCase):
 
     def test_signup_user_username_taken(self):
         users.objects.create(username="newuser")
-        response = self.client.post(reverse('signup_user'), {
+        response = self.client.post(reverse('sign_up'), {
             'username': 'newuser', 'password': 'validpass'
         })
         self.assertEqual(response.status_code, 200)
@@ -83,7 +83,7 @@ class SignupUserTestCase(TestCase):
         self.assertEqual(response.json()["response"], "Username already exists, please choose another username")
 
     def test_signup_user_short_password(self):
-        response = self.client.post(reverse('signup_user'), {
+        response = self.client.post(reverse('sign_up'), {
             'username': 'newuser', 'password': '123'
         })
         self.assertEqual(response.status_code, 200)
@@ -95,18 +95,18 @@ class LoginUserTestCase(TestCase):
         self.user = users.objects.create(username="testuser", password="securepassword")
 
     def test_login_user_valid(self):
-        response = self.client.get(reverse('login_user'), {'username': 'testuser', 'password': 'securepassword'})
+        response = self.client.get(reverse('login'), {'username': 'testuser', 'password': 'securepassword'})
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["error"])
 
     def test_login_user_invalid_username(self):
-        response = self.client.get(reverse('login_user'), {'username': 'wronguser', 'password': 'securepassword'})
+        response = self.client.get(reverse('login'), {'username': 'wronguser', 'password': 'securepassword'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["error"])
         self.assertEqual(response.json()["response"], "Username is not valid")
 
     def test_login_user_invalid_password(self):
-        response = self.client.get(reverse('login_user'), {'username': 'testuser', 'password': 'wrongpassword'})
+        response = self.client.get(reverse('login'), {'username': 'testuser', 'password': 'wrongpassword'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["error"])
         self.assertEqual(response.json()["response"], "Password is not valid")
