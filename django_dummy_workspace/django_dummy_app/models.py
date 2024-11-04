@@ -8,7 +8,7 @@ import uuid
 def generate_message_id():
     while True:
         id = uuid.uuid4()
-        if messages.objects.filter(message_id=id).count() == 0:
+        if user_messages.objects.filter(message_id=id).count() == 0:
             break
 
     return id
@@ -69,11 +69,12 @@ class replies(models.Model):
     def str(self):
         return self.reply_id
 
-class messages(models.Model):
+class user_messages(models.Model):
     message_id = models.IntegerField(primary_key=True, default=generate_message_id, unique=True, null=False)
     user_id = models.IntegerField(null=False)
     reciever_id = models.IntegerField(null=False)
     text = models.CharField(max_length=255)
+    creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
         return self.message_id
