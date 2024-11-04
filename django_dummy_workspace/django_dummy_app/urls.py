@@ -25,10 +25,7 @@ urlpatterns = [
     path('replies/', get_replies, name = 'replies'),
 
     #MESSAGE
-    path('messages/', get_messages, name = 'messages'),
-    path('get_messages/', get_user_messages, name='get_messages'),
-    path('send_messages/', send_message, name='send_message'),
-    path('test1/', test1, name = 'test1'),
+    path('messages/', messages, name = 'messages'),
 
     #LOGIN/SIGN-UP
     path('login/', login_user, name = 'login'),
