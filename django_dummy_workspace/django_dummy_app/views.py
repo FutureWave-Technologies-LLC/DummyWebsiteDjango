@@ -187,11 +187,9 @@ def following(request):
         #USER HAS NOT FOLLOWED USER OR NOT FOLLOWED AT ALL
         else:
             #PRIMARY KEY IS THE LAST FOLLOW'S PRIMARY KEY+1
-            new_primary_key = -1
+            new_primary_key = 0
             if (follow.objects.last()):
                 new_primary_key = follow.objects.last().primary_key + 1
-            else:
-                new_primary_key = 0
             new_follow_info = follow(primary_key = new_primary_key,
                                      follower_id = request_follower_id,
                                      followee_id = to_follow_id)
@@ -274,11 +272,35 @@ def get_replies(request):
     data = replies.objects.all().values()
     return Response(list(data))
 
-#GET COMMENTS
-@api_view(['GET'])
+#COMMENTS API
+@api_view(['GET','POST'])
 def get_comments(request):
-    data = comments.objects.all().values()
-    return Response(list(data))
+    #GET COMMENT FEED BASED ON POST ID
+    if request.method == 'GET':
+        request_post_id = request.GET.get("post_id")
+        comment_feed = []
+        comments_of_post = comments.objects.filter(post_id = request_post_id)
+        for comment in comments_of_post:
+            user = users.objects.filter(user_id = comment.user_id).first()
+            comment_feed.append({"username": user.username, 
+                                 "user_id": user.user_id,
+                                 "comment": comment.comment})
+        return Response(comment_feed)
+    #CREATE NEW COMMENT
+    elif request.method == 'POST':
+        request_user_id = request.data.get("user_id")
+        request_post_id = request.data.get("post_id")
+        request_comment = request.data.get("comment")
+
+        new_primary_key = 0
+        if (comments.objects.last()):
+            new_primary_key = comments.objects.last().comment_id + 1
+        comment_info = comments(comment_id = new_primary_key,
+                                user_id = request_user_id,
+                                post_id = request_post_id,
+                                comment = request_comment)
+        comment_info.save()
+        return JsonResponse({"Response": "Commented created"}, safe=False)
 
 #GET PERSONAL PAGES
 @api_view(['GET'])
