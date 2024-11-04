@@ -6,7 +6,7 @@ from .models import *
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
-from django.contrib import messages
+# from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -44,24 +44,28 @@ def get_user_messages(request):
     serializer = MessageSerializer(user_messages, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-def test1(request):
-    user = request.user
-    # Filter messages where the user is either the sender or the receiver
-    user_messages = messages.objects.filter(user=user) | messages.objects.filter(reciever_id=user.id)
-    serializer = MessageSerializer(user_messages, many=True)
-    return Response(serializer.data)
+#USER MESSAGES
+@api_view(['GET','POST'])
+def messages(request):
+    #GET MESSAGES FOR TWO USERS BASED ON ID
+    if request.method == 'GET':
+        user_id = request.GET.get("user_id")
+        reciever_id = request.GET.get("reciever_id")
 
-#SEND MESSAGES
-@api_view(['POST'])
-def send_message(request):
-    serializer_class = MessageSerializer
-    serializer = serializer_class(data=request.data)
+        queryset = user_messages.objects.filter(user_id=user_id, reciever_id=reciever_id) | user_messages.objects.filter(user_id=reciever_id, reciever_id=user_id)
+        serializer = MessageSerializer(queryset, many=True)
+        return Response(serializer.data)
+    #CREATE A MESSAGE
+    elif request.method == 'POST':
+        serializer_class = MessageSerializer
+        serializer = serializer_class(data=request.data)
 
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
 from random import randrange
@@ -263,12 +267,6 @@ def get_post(request):
     else:
         json_data = {"response": "Post with this ID cannot be found", "error": True}
         return JsonResponse(json_data, safe=False)
-
-#GET MESSAGES
-@api_view(['GET'])
-def get_messages(request):
-    data = messages.objects.all().values()
-    return Response(list(data))
 
 #GET REPLIES
 @api_view(['GET'])
