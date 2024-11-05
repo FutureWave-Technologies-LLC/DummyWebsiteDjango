@@ -236,7 +236,8 @@ def recieving_posts(request):
     user = users.objects.filter(username=data.get('username')).first()
 
     my_post_info = posts(post_id = my_post_id, media = 'media', 
-                         text = data.get('postText'), user_id = user.user_id, 
+                         text = data.get('postText'), 
+                         user_id = user.user_id, 
                          title = data.get('title'), 
                          username = user.username)
     my_post_info.save()
@@ -300,6 +301,7 @@ def get_comments(request):
                                 post_id = request_post_id,
                                 comment = request_comment)
         comment_info.save()
+        print(comment_info.pst_creation_date())
         return JsonResponse({"Response": "Commented created"}, safe=False)
 
 #GET PERSONAL PAGES
