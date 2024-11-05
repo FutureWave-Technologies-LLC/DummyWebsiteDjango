@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+# pip install pytz
+import pytz
 import uuid
 
 # Create your models here.
@@ -10,8 +11,13 @@ def generate_message_id():
         id = uuid.uuid4()
         if user_messages.objects.filter(message_id=id).count() == 0:
             break
-
     return id
+
+def convert_pst(time):
+    if time.tzinfo is None:
+        time = pytz.utc.localize(time)
+    pst_timezone = pytz.timezone("America/Los_Angeles")
+    return time.astimezone(pst_timezone)
 
 
 class likes(models.Model):
@@ -50,19 +56,25 @@ class posts(models.Model):
     text = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
+    creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
         return self.post_id
+    def pst_creation_date(self):
+        return convert_pst(self.creation_date)
 
 class comments(models.Model):
     comment_id = models.IntegerField(primary_key=True, null=False)
     user_id = models.IntegerField(null=False)
     post_id = models.IntegerField(null=False)
     comment = models.CharField(max_length=255)
+    creation_date = models.DateTimeField(auto_now_add=True)
     # post = models.ForeignKey(posts, on_delete=models.CASCADE)
 
     def str(self):
         return self.comment_id
+    def pst_creation_date(self):
+        return convert_pst(self.creation_date)
 
 class replies(models.Model):
     reply_id = models.IntegerField(primary_key=True, null=False)
@@ -82,6 +94,8 @@ class user_messages(models.Model):
 
     def str(self):
         return self.message_id
+    def pst_creation_date(self):
+        return convert_pst(self.creation_date)
     
 class follow(models.Model):
     primary_key = models.IntegerField(primary_key=True, null = False)
