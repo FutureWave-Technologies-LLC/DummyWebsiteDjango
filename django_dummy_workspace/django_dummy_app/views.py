@@ -261,7 +261,8 @@ def get_post(request):
                      "text": post.text,
                      "username":post.username,
                      "user_id": post.user_id,
-                     "media": post.media}
+                     "media": post.media,
+                     "creation_date": post.creation_date}
         return JsonResponse(json_data, safe=False)
     else:
         json_data = {"response": "Post with this ID cannot be found", "error": True}
@@ -285,7 +286,8 @@ def get_comments(request):
             user = users.objects.filter(user_id = comment.user_id).first()
             comment_feed.append({"username": user.username, 
                                  "user_id": user.user_id,
-                                 "comment": comment.comment})
+                                 "comment": comment.comment,
+                                 "creation_date": comment.creation_date})
         return Response(comment_feed)
     #CREATE NEW COMMENT
     elif request.method == 'POST':
