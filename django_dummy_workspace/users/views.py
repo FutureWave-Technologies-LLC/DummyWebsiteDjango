@@ -23,7 +23,13 @@ def get_user_data(request):
     user = users.objects.filter(user_id = requested_user_id).first()
     
     if user:
-        json_data = {"username": user.username, "user_id": user.user_id, "error": False}
+        json_data = {"username": user.username, 
+                     "user_id": user.user_id, 
+                     "profile_image": user.profile_image,
+                     "first_name": user.first_name,
+                     "last_name": user.last_name,
+                     "creation_date": user.creation_date,
+                     "error": False}
         return JsonResponse(json_data, safe=False)
     else:
         json_data = {"response": "User with this ID cannot be found", "error": True}
@@ -48,7 +54,7 @@ def authenticate_user(request):
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
 
-#SIGN-IN/LOGIN USER
+#LOGIN USER
 @api_view(['GET'])
 def login_user(request):
     request_username = request.GET.get("username")
@@ -86,13 +92,14 @@ def signup_user(request):
     print(f'RAW PASSWORD:{data['password']}')
     data['password'] = hashlib.sha256(str(data.get('password')).encode()).hexdigest()
     
-    new_user_info = UsersSerializer(data=data)
-    if new_user_info.is_valid():
-        new_user_info.save()
-        json_data = {"response": "User was created", "error": False}
-        return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
-    else:
-        return JsonResponse(new_user_info.errors, safe=False, status=status.HTTP_400_BAD_REQUEST)
+    new_user_info = users(username=data.get('username'),
+                          password=data.get('password'),
+                          first_name=data.get('first_name'),
+                          last_name=data.get('last_name'),
+                          profile_image="")
+    new_user_info.save()
+    json_data = {"response": "User was created", "error": False}
+    return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
         
 
 #SEARCH FOR USERS VIA SEARCHBAR
@@ -109,3 +116,16 @@ def search_users(request):
     else:
         json_data = {"Response": f"No matching user found for: {query_username}", "error": True}
         return JsonResponse(json_data, safe=False)
+    
+#UPDATE USER'S SETTINGS
+@api_view(['POST'])
+def update_settings(request):
+    data = request.data
+
+    user = users.objects.filter(user_id=data.get('user_id')).first()
+
+    #UPDATE FIELDS FOR USER
+    user.profile_image = data.get('profile_image')
+    user.save()
+
+    return HttpResponse(status=status.HTTP_200_OK)

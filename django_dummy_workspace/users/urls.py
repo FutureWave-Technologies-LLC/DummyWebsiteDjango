@@ -9,5 +9,7 @@ urlpatterns = [
 
     #LOGIN/SIGN-UP
     path('login/', login_user, name = 'login'),
-    path('sign_up/', signup_user, name = 'sign_up')
+    path('sign_up/', signup_user, name = 'sign_up'),
+
+    path('update_settings/', update_settings, name = 'settings')
 ]

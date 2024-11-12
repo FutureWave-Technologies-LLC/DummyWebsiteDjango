@@ -44,7 +44,7 @@ def post(request):
 @api_view(['GET'])
 def get_posts(request):
     response_set = []
-    for post in posts.objects.all():
+    for post in posts.objects.all().order_by("creation_date"):
         response_set.append({"post_id": post.post_id, 
                             "title": post.title, 
                             "description": post.description,
@@ -71,7 +71,8 @@ def get_comments(request):
         comments_of_post = comments.objects.filter(post_id = request_post_id).order_by("creation_date")
         for comment in comments_of_post:
             user = users.objects.filter(user_id = comment.author.user_id).first()
-            comment_feed.append({"username": user.username, 
+            comment_feed.append({"username": user.username,
+                                 "profile_image": user.profile_image,
                                  "user_id": user.user_id,
                                  "comment": comment.comment,
                                  "creation_date": comment.creation_date})

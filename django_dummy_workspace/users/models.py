@@ -12,11 +12,13 @@ class users(models.Model):
                                   editable=False,
                                   default=generate_user_id)
     
-    username = models.CharField(max_length=20)
-    password = models.CharField(max_length=255)
-    
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
+    username = models.CharField(max_length=20, null=False)
+    password = models.CharField(max_length=150, null=False)
+    profile_image = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=20, null=False)
+    last_name = models.CharField(max_length=20, null=False)
 
+    creation_date = models.DateTimeField(auto_now_add=True)
+    
     def str(self):
         return self.user_id
