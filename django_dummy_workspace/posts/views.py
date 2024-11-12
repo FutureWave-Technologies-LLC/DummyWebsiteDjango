@@ -51,7 +51,6 @@ def get_posts(request):
                             "username": post.author.username,
                             "media": post.media,
                             "creation_date": post.creation_date})
-    print(response_set)
     return Response(response_set)
     
 
