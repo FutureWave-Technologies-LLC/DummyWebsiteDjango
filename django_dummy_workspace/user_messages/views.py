@@ -18,8 +18,8 @@ def messages(request):
         req_sender_id = request.GET.get("sender_id")
         req_receiver_id = request.GET.get("receiver_id")
 
-        queryset = user_messages.objects.filter(sender=req_sender_id, receiver_id=req_receiver_id) | user_messages.objects.filter(sender=req_receiver_id, receiver_id=req_sender_id).order_by("creation_date")
-        serializer = MessageSerializer(queryset, many=True)
+        queryset = user_messages.objects.filter(sender=req_sender_id, receiver_id=req_receiver_id) | user_messages.objects.filter(sender=req_receiver_id, receiver_id=req_sender_id)
+        serializer = MessageSerializer(queryset.order_by("creation_date"), many=True)
         return Response(serializer.data)
     #CREATE A MESSAGE
     elif request.method == 'POST':
