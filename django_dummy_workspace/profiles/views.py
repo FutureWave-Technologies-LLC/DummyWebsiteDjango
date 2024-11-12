@@ -11,9 +11,16 @@ from django.http import JsonResponse
 #GETS PROFILE POSTS
 @api_view(['GET'])
 def profile_posts(request):
-    username = request.GET.get('username')
-    post = posts.objects.filter(username=username).values()  # Assuming posts have a 'username' field
-    return JsonResponse(list(post), safe=False)
+    user = users.objects.filter(user_id=request.GET.get('user_id')).first()
+    response_set = []
+    for post in posts.objects.filter(author=user):
+        response_set.append({"post_id": post.post_id, 
+                            "title": post.title, 
+                            "description": post.description,
+                            "username": post.author.username,
+                            "media": post.media,
+                            "creation_date": post.creation_date})
+    return Response(response_set)
 
 #API FOR FOLLOWING
 @api_view(['GET','POST'])
@@ -21,31 +28,29 @@ def following(request):
     #USER FOLLOWS ANOTHER USER
     if request.method == 'POST':
         data = request.data 
-        request_username_to_follow = data.get("username_to_follow")
+        request_followee_username = data.get("followee_username")
         request_follower_id = data.get("follower_id")
 
-        #USER TO FOLLOW
-        followee_user = users.objects.filter(username = request_username_to_follow).first()
+        #FIND THE FOLLOWEE
+        followee_user = users.objects.filter(username = request_followee_username).first()
         followee_username = followee_user.username
         followee_id = followee_user.user_id
         
         #GET FOLLOWS WITH THE ID OF FOLLOWER (WHO SENT FROM REQUEST) 
         follower_user = users.objects.filter(user_id=request_follower_id).first()
         follows_with_follower = follow.objects.filter(follower_id = request_follower_id)
-        isFollowing = False
         primary_key = -1
 
         #CHECK IN EACH FOLLOW IF HAVE ID OF USER TO FOLLOW
         if follows_with_follower:
             for follow_with_follower in follows_with_follower:
                 if follow_with_follower.followee_id == followee_id:
-                    isFollowing = True
-                    primary_key = follow_with_follower.primary_key
+                    primary_key = follow_with_follower.pk_follow
                     break
         
         #USER HAS FOLLOWED USER
-        if isFollowing:
-            current_follow = follow.objects.filter(primary_key = primary_key).first()
+        if primary_key != -1:
+            current_follow = follow.objects.filter(pk_follow = primary_key).first()
             current_follow.delete()
             json_data = {"Response": f"{request_follower_id} unfollowed {followee_id} ({followee_username})", 
                          "Followed": False,
@@ -54,14 +59,8 @@ def following(request):
         
         #USER HAS NOT FOLLOWED USER OR NOT FOLLOWED AT ALL
         else:
-            #PRIMARY KEY IS THE LAST FOLLOW'S PRIMARY KEY+1
-            new_primary_key = 0
-            if (follow.objects.last()):
-                new_primary_key = follow.objects.last().primary_key + 1
-            new_follow_info = follow(primary_key = new_primary_key,
-                                     follower_id = request_follower_id,
-                                     followee_id = followee_id,
-                                     followee_model = followee_user)
+            new_follow_info = follow(follower = follower_user,
+                                     followee_id = followee_id)
             new_follow_info.save()
             json_data = {"Response": f"{request_follower_id} followed {followee_id} ({followee_username})", 
                          "Followed": True,

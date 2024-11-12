@@ -3,5 +3,5 @@ from .views import *
 
 urlpatterns = [
     #MESSAGE
-    path('messages/', messages, name = 'messages'),
+    path('message/', messages, name = 'messages'),
 ]

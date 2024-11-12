@@ -1,7 +1,29 @@
 from django.db import models
 from users.models import *
+from random import randrange
 # pip install pytz
 import pytz
+
+def generate_post_id():
+    while True:
+        id = randrange(0, 999999)
+        if posts.objects.filter(post_id = id).count() == 0:
+            break
+    return id
+
+def generate_comments_id():
+    while True:
+        id = randrange(0, 999999)
+        if comments.objects.filter(post_id = id).count() == 0:
+            break
+    return id
+
+def generate_replies_id():
+    while True:
+        id = randrange(0, 999999)
+        if replies.objects.filter(post_id = id).count() == 0:
+            break
+    return id
 
 def convert_pst(time):
     if time.tzinfo is None:
@@ -10,13 +32,16 @@ def convert_pst(time):
     return time.astimezone(pst_timezone)
 
 class posts(models.Model):
-    user_model = models.ForeignKey(users, on_delete=models.CASCADE)
+    author = models.ForeignKey(users, on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=255, null=False)
+    description = models.CharField(max_length=500, null=False)
+    media = models.CharField(max_length=255, null=True)
     
-    post_id = models.IntegerField(primary_key=True, null=False)
-    media = models.CharField(max_length=255)
-    text = models.CharField(max_length=255)
-    title = models.CharField(max_length=255)
-    username = models.CharField(max_length=255)
+    post_id = models.IntegerField(primary_key=True, 
+                                  null=False,
+                                  unique= True,
+                                  default=generate_post_id)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
@@ -25,13 +50,15 @@ class posts(models.Model):
         return convert_pst(self.creation_date)
 
 class comments(models.Model):
-    user_model = models.ForeignKey(users, on_delete=models.CASCADE)
-    post_model = models.ForeignKey(posts, on_delete=models.CASCADE)
+    author = models.ForeignKey(users, on_delete=models.CASCADE)
+    post = models.ForeignKey(posts, on_delete=models.CASCADE)
 
-    comment_id = models.IntegerField(primary_key=True, null=False)
-    user_id = models.IntegerField(null=False)
-    post_id = models.IntegerField(null=False)
-    comment = models.CharField(max_length=255)
+    comment = models.CharField(max_length=256, null=False)
+
+    comment_id = models.IntegerField(primary_key=True,
+                                      null=False, 
+                                      unique=True,
+                                      default=generate_comments_id)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
@@ -40,10 +67,11 @@ class comments(models.Model):
         return convert_pst(self.creation_date)
 
 class replies(models.Model):
-    reply_id = models.IntegerField(primary_key=True, null=False)
-    user_id = models.IntegerField(null=False)
+    author = models.ForeignKey(users, on_delete=models.CASCADE)
+
+    reply_id = models.IntegerField(primary_key=True, null=False, default=-1)
     comment_id = models.IntegerField(null=False)
-    reply = models.CharField(max_length=255)
+    reply = models.CharField(max_length=255, null=False)
 
     def str(self):
         return self.reply_id
