@@ -37,6 +37,7 @@ CORS_ALLOWED_ORIGINS = [
 
 INSTALLED_APPS = [
     'corsheaders',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_dummy_app',
     'rest_framework',
+    'posts.apps.PostsConfig',
+    'users.apps.UsersConfig',
+    'user_messages.apps.UserMessagesConfig',
+    'profiles.apps.ProfilesConfig'
 ]
 
 REST_FRAMEWORK = {
@@ -89,6 +94,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
+ASGI_APPLICATION = 'django_dummy_project.asgi.application'
 
 
 # Database

@@ -24,9 +24,9 @@ urlpatterns = [
     # django_dummy_app views
     # path('admin/', admin.site.urls),
     path('api/', include('django_dummy_app.urls')),
-    # path('', views.home, name='home'),
-    path('home/', home, name="recipes"),                # Home page
-    path("admin/", admin.site.urls),                    # Admin interface
-    # path('login/', login_page, name='login_page'),       # Login page
-    # path('register/', register_page, name='register'),   # Registration page
+    #path('home/', home, name="recipes"),                # Home page
+    path('users/', include('users.urls')),
+    path('posts/', include('posts.urls')),
+    path('profiles/', include('profiles.urls')),
+    path('messaging/', include('user_messages.urls'))
 ]
