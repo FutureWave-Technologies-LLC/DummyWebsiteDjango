@@ -17,23 +17,25 @@ def get_users(request):
     return Response(list(data))
 
 #GET USER'S DATA BASED ON ID
-@api_view(['GET'])
 def get_user_data(request):
     requested_user_id = request.GET.get("user_id")
-    user = users.objects.filter(user_id = requested_user_id).first()
+    user = users.objects.filter(user_id=requested_user_id).first()
     
     if user:
-        json_data = {"username": user.username, 
-                     "user_id": user.user_id, 
-                     "profile_image": user.profile_image,
-                     "first_name": user.first_name,
-                     "last_name": user.last_name,
-                     "creation_date": user.creation_date,
-                     "error": False}
-        return JsonResponse(json_data, safe=False)
+        json_data = {
+            "username": user.username, 
+            "user_id": user.user_id, 
+            "profile_image": user.profile_image,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "creation_date": user.creation_date,
+            "error": False
+        }
+        return Response(json_data)
     else:
+        # Return a 404 status with DRF Response for consistency
         json_data = {"response": "User with this ID cannot be found", "error": True}
-        return JsonResponse(json_data, safe=False)
+        return Response(json_data, status=status.HTTP_404_NOT_FOUND)
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
 @api_view(['POST'])
