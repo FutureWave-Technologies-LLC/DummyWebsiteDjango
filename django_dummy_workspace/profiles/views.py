@@ -51,7 +51,13 @@ def following(request):
             return Response({"error": "You cannot follow yourself"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Check if the follow relationship exists
-        existing_follow = follow.objects.filter(follower=follower_user, followee=followee_user).first()
+        try:
+            followee = users.objects.get(username=followee_username)  # Look up the user by username
+            existing_follow = follow.objects.filter(follower=follower_user, followee_id=followee_user.user_id).first()
+        except users.DoesNotExist:
+            # Handle the case when the followee username doesn't exist
+            existing_follow = None
+
         
         if existing_follow:
             # If the relationship exists, unfollow (delete)
@@ -63,7 +69,7 @@ def following(request):
             })
         else:
             # If the relationship does not exist, follow (create)
-            follow.objects.create(follower=follower_user, followee=followee_user)
+            follow.objects.create(follower=follower_user, followee_id=followee.user_id)
             return Response({
                 "Followed": True,
                 "error": False,
@@ -92,7 +98,7 @@ def get_followers(request):
     if not user:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    followers = follow.objects.filter(followee=user)
+    followers = follow.objects.filter(followee_id=user.user_id)
     followers_list = [{"username": follower.username, "user_id": follower.user_id} for follower in users.objects.filter(user_id__in=[f.follower_id for f in followers])]
     
     return Response(followers_list)
