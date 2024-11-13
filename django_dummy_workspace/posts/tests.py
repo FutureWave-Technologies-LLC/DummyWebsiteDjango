@@ -7,25 +7,23 @@ from .models import posts, users, comments, replies
 class PostViewTests(APITestCase):
     
     def setUp(self):
-        # Create a test user and post
         self.user = users.objects.create(user_id=1, username="testuser")
         self.post = posts.objects.create(author=self.user, title="Test Post", description="Test Desc", media="media")
 
     def test_get_post_not_found(self):
-        # Use an invalid ID that doesn't exist
-        url = reverse('post')  # replace with the name of your URL pattern
-        response = self.client.get(url, {'post_id': 99999})  # 99999 doesn't exist
+        url = reverse('post')  
+        response = self.client.get(url, {'post_id': 99999})  
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_get_post_success(self):
-        url = reverse('post')  # Adjust this to match the actual URL name
+        url = reverse('post')  
         response = self.client.get(url, {'post_id': self.post.post_id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['post_id'], self.post.post_id)
 
     def test_create_post_success(self):
-        url = reverse('post')  # Adjust this to match the actual URL name
+        url = reverse('post')  
         data = {
             'user_id': self.user.user_id,
             'title': 'Test Post',
@@ -44,7 +42,7 @@ class GetPostsViewTests(APITestCase):
         posts.objects.create(author=self.user, title="Post 2", description="Description 2", media="media2")
 
     def test_get_all_posts(self):
-        url = reverse('all_posts')  # replace with the name of your URL pattern
+        url = reverse('all_posts')  
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -53,11 +51,10 @@ class GetRepliesViewTests(APITestCase):
     def setUp(self):
         self.user = users.objects.create(user_id=1, username="testuser")
         self.post = posts.objects.create(author=self.user, title="Test Post", description="Test Desc", media="media")
-        # Create a reply with the correct fields based on your model
         replies.objects.create(author=self.user, comment_id=1, reply="Test reply")
 
     def test_get_replies(self):
-        url = reverse('replies')  # replace with the name of your URL pattern
+        url = reverse('replies')  
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.data), 0)
@@ -70,7 +67,7 @@ class CommentsViewTests(APITestCase):
         comments.objects.create(author=self.user, post=self.post, comment="This is a test comment")
 
     def test_get_comments_success(self):
-        url = reverse('comments')  # replace with the name of your URL pattern
+        url = reverse('comments')  
         response = self.client.get(url, {'post_id': self.post.post_id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.json()), 0)
@@ -85,12 +82,11 @@ class CommentsViewTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json().get('Response'), "Commented created")
-###############################################################################################################################################
 
 class CreatePostViewTests(APITestCase):
     def setUp(self):
         self.user = users.objects.create(user_id=1, username="testuser")
-        self.url = reverse('post')  # replace with your actual URL name for this endpoint
+        self.url = reverse('post')  
 
     def test_create_post(self):
         data = {
@@ -107,7 +103,7 @@ class GetPostViewTests(APITestCase):
     def setUp(self):
         self.user = users.objects.create(user_id=1, username="testuser")
         self.post = posts.objects.create(author=self.user, title="Test Post", description="Test Desc", media="media")
-        self.url = reverse('post')  # replace with your actual URL name for this endpoint
+        self.url = reverse('post')  
 
     def test_get_post(self):
         response = self.client.get(f'{self.url}?post_id={self.post.post_id}')
@@ -122,7 +118,7 @@ class GetAllPostsViewTests(APITestCase):
             posts.objects.create(author=self.user, title=f"Post {i}", description=f"Description {i}", media="media_url") 
             for i in range(3)
         ]
-        self.url = reverse('all_posts')  # replace with your actual URL name for this endpoint
+        self.url = reverse('all_posts')  
 
     def test_get_all_posts(self):
         response = self.client.get(self.url)
@@ -133,7 +129,7 @@ class CreateCommentViewTests(APITestCase):
     def setUp(self):
         self.user = users.objects.create(user_id=1, username="testuser")
         self.post = posts.objects.create(author=self.user, title="Test Post", description="Test Desc", media="media")
-        self.url = reverse('comments')  # replace with your actual URL name for this endpoint
+        self.url = reverse('comments')  
 
     def test_create_comment(self):
         data = {
@@ -150,7 +146,7 @@ class GetCommentsViewTests(APITestCase):
         self.user = users.objects.create(user_id=1, username="testuser")
         self.post = posts.objects.create(author=self.user, title="Test Post", description="Test Desc", media="media")
         self.comment = comments.objects.create(author=self.user, post=self.post, comment="Test comment")
-        self.url = reverse('comments')  # replace with your actual URL name for this endpoint
+        self.url = reverse('comments')  
 
     def test_get_comments(self):
         response = self.client.get(f'{self.url}?post_id={self.post.post_id}')
@@ -161,9 +157,9 @@ class GetCommentsViewTests(APITestCase):
 class GetPostInvalidIDViewTests(APITestCase):
     def setUp(self):
         self.user = users.objects.create(user_id=1, username="testuser")
-        self.url = reverse('post')  # replace with your actual URL name for this endpoint
+        self.url = reverse('post')  
 
     def test_get_post_invalid_id(self):
-        response = self.client.get(f'{self.url}?post_id=9999')  # Assuming 9999 doesn't exist
+        response = self.client.get(f'{self.url}?post_id=9999')  
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['response'], "Post with this ID cannot be found")
