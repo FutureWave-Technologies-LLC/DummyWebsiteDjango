@@ -163,3 +163,37 @@ class GetPostInvalidIDViewTests(APITestCase):
         response = self.client.get(f'{self.url}?post_id=9999')  
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['response'], "Post with this ID cannot be found")
+
+class UpdatePostViewTests(APITestCase):
+    def setUp(self):
+        self.user = users.objects.create(user_id=1, username="testuser")
+        self.post = posts.objects.create(author=self.user, title="Original Title", description="Original Description", media="media")
+        self.url = reverse('post')
+
+    def test_update_post_success(self):
+        data = {
+            'post_id': self.post.post_id,
+            'title': 'Updated Title',
+            'description': 'Updated Description',
+            'media': 'updated_media'
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.title, 'Updated Title')
+        self.assertEqual(self.post.description, 'Updated Description')
+
+
+class DeletePostViewTests(APITestCase):
+    def setUp(self):
+        self.user = users.objects.create(user_id=1, username="testuser")
+        self.post = posts.objects.create(author=self.user, title="Title to be Deleted", description="Description", media="media")
+        self.url = reverse('post')
+
+    def test_delete_post_success(self):
+        response = self.client.delete(f'{self.url}?post_id={self.post.post_id}')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        
+        response = self.client.get(f'{self.url}?post_id={self.post.post_id}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
