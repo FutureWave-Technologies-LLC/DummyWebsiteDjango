@@ -46,16 +46,34 @@ def authenticate_user(request):
     user = users.objects.filter(username=data.get('username')).first()
 
     if user and user.password == hashlib.sha256(str(data.get('password')).encode()).hexdigest():
-        # Generate token with user_id and username, add token_id for additional use
+        # Generate token with user_id and username, token_id
+        random_token_id = randrange(1, 100000)
+        #save random token id to user
+        user.token_id = random_token_id
+        user.save()
+
         json_data = {
             "username": user.username,
             "user_id": user.user_id,  # Include user_id here
-            "token_id": randrange(1, 100000)  # Random token ID (you could replace this with a real token if needed)
+            "token_id":  random_token_id # Random token ID
         }
         return JsonResponse(json_data, safe=False, status=status.HTTP_200_OK)
     else:
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
+
+#COMPARES USER'S TOKEN ID WITH SERVER
+@api_view(['GET'])
+def compare_token_ids(request):
+    user_id = request.GET.get("user_id")
+    local_token_id = request.GET.get("token_id")
+
+    user = users.objects.filter(user_id=user_id).first()
+
+    if (int(user.token_id) == int(local_token_id)):
+        return JsonResponse({"response": True}, safe=False, status=status.HTTP_200_OK)
+    else:
+        return JsonResponse({"response": False}, safe=False, status=status.HTTP_200_OK)
 
 #LOGIN USER
 @api_view(['GET'])
@@ -99,7 +117,8 @@ def signup_user(request):
                           password=data.get('password'),
                           first_name=data.get('first_name'),
                           last_name=data.get('last_name'),
-                          profile_image="")
+                          profile_image="",
+                          token_id=-1)
     new_user_info.save()
     json_data = {"response": "User was created", "error": False}
     return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
@@ -134,3 +153,5 @@ def update_settings(request):
     user.save()
 
     return HttpResponse(status=status.HTTP_200_OK)
+
+    
