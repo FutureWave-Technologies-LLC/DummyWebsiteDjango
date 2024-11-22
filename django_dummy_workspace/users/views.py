@@ -17,6 +17,7 @@ def get_users(request):
     return Response(list(data))
 
 #GET USER'S DATA BASED ON ID
+@api_view(['GET'])
 def get_user_data(request):
     requested_user_id = request.GET.get("user_id")
     user = users.objects.filter(user_id=requested_user_id).first()
@@ -111,7 +112,9 @@ def search_users(request):
     matched_users = []
     for user in users.objects.all():
         if (user.username.find(query_username) != -1):
-            matched_users.append({"username": user.username, "user_id": user.user_id})
+            matched_users.append({"username": user.username, 
+                                  "user_id": user.user_id,
+                                  "profile_image": user.profile_image})
 
     if len(matched_users) > 0:
         return(Response(matched_users))
