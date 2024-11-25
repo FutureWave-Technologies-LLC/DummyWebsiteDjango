@@ -11,6 +11,13 @@ def generate_post_id():
             break
     return id
 
+def likes_id():
+    while True:
+        id = randrange(0, 999999)
+        if likes.objects.filter(post_id = id).count() == 0:
+            break
+    return id
+
 def generate_comments_id():
     while True:
         id = randrange(0, 999999)
@@ -49,6 +56,21 @@ class posts(models.Model):
     def pst_creation_date(self):
         return convert_pst(self.creation_date)
 
+class likes(models.Model):
+    author = models.ForeignKey(users, on_delete=models.CASCADE)
+    post = models.ForeignKey(posts, on_delete=models.CASCADE)
+
+    like_id = models.IntegerField(primary_key=True,
+                                      null=False, 
+                                      unique=True,
+                                      default=likes_id)
+    creation_date = models.DateTimeField(auto_now_add=True)
+
+    def str(self):
+        return self.like_id
+    def pst_creation_date(self):
+        return convert_pst(self.creation_date)
+    
 class comments(models.Model):
     author = models.ForeignKey(users, on_delete=models.CASCADE)
     post = models.ForeignKey(posts, on_delete=models.CASCADE)
