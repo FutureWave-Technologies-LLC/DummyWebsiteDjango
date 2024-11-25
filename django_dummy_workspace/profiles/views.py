@@ -20,7 +20,7 @@ def profile_posts(request):
     for post in posts.objects.filter(author=user).order_by("creation_date"):
         response_set.append({
             "post_id": post.post_id, 
-            "title": post.title, 
+            "title": post.title,  
             "description": post.description,
             "username": post.author.username,
             "media": post.media,
@@ -69,7 +69,8 @@ def following(request):
             })
         else:
             # If the relationship does not exist, follow (create)
-            follow.objects.create(follower=follower_user, followee_id=followee.user_id)
+            follow.objects.create(follower=follower_user, 
+                                  followee_id=followee.user_id)
             return Response({
                 "Followed": True,
                 "error": False,
