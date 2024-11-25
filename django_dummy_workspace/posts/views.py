@@ -53,6 +53,55 @@ def get_posts(request):
                             "creation_date": post.creation_date})
     return Response(response_set)
     
+#LIKES API
+@api_view(['GET','POST'])
+def likes_view(request):
+    #GET TOTAL LIKES AND BOOLEAN IF USER LIKED
+    if request.method == 'GET':
+        request_user_id = request.GET.get('user_id')
+        request_post_id = request.GET.get("post_id")
+        queryset = likes.objects.filter(post_id = request_post_id)
+
+        #Total likes
+        like_count = queryset.count()
+
+        #Did user like?
+        user_liked = False
+        query_user_like = queryset.filter(author_id = request_user_id).first()
+        if query_user_like:
+            user_liked = True
+        json_data = {"total_likes": like_count, "user_liked": user_liked} 
+        return JsonResponse(json_data, safe=False)
+    
+    #UPDATE LIKE
+    elif request.method == 'POST':
+        request_user_id = request.data.get('user_id')
+        request_post_id = request.data.get('post_id')
+
+        #Find if user liked or not
+        queryset = likes.objects.filter(post_id = request_post_id)
+        query_user_like = queryset.filter(author_id = request_user_id).first()
+
+        #User already liked, thus unlike
+        if query_user_like:
+            query_user_like.delete()
+            return Response({
+                "Liked": False,
+                "error": False,
+                "Response": f"{request_user_id} unliked post with id {request_post_id}"
+            })
+        #User did not like, thus like
+        else:
+            user = users.objects.filter(user_id = request_user_id).first()
+            post = posts.objects.filter(post_id = request_post_id).first()
+            likes.objects.create(author = user,
+                                 post = post)
+            return Response({
+                "Liked": True,
+                "error": False,
+                "Response": f"{request_user_id} liked post with id {request_post_id}"
+            })
+
 
 #GET REPLIES
 @api_view(['GET'])
