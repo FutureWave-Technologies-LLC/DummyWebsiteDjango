@@ -17,7 +17,7 @@ def profile_posts(request):
         return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
     
     response_set = []
-    for post in posts.objects.filter(author=user):
+    for post in posts.objects.filter(author=user).order_by("creation_date"):
         response_set.append({
             "post_id": post.post_id, 
             "title": post.title, 
