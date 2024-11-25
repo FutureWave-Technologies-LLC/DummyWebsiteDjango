@@ -89,7 +89,7 @@ def signup_user(request):
         return JsonResponse(json_data, safe=False)
     
     #hash password
-    print(f'RAW PASSWORD:{data['password']}')
+    # print(f'RAW PASSWORD:{data['password']}')
     data['password'] = hashlib.sha256(str(data.get('password')).encode()).hexdigest()
     
     new_user_info = users(username=data.get('username'),
