@@ -17,6 +17,7 @@ class users(models.Model):
     profile_image = models.CharField(max_length=150)
     first_name = models.CharField(max_length=20, null=False)
     last_name = models.CharField(max_length=20, null=False)
+    token_id = models.IntegerField(null=False)
 
     creation_date = models.DateTimeField(auto_now_add=True)
     

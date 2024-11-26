@@ -2,8 +2,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('following/', following, name='follow'),
-    path('get_followers/', get_followers, name='follow'),
-    
-    path('profile_posts/', profile_posts, name = 'profile posts'),
+    path('following/', following, name='following'),
+    path('get_followers/', get_followers, name='get_followers'),
+    path('profile_posts/', profile_posts, name = 'profile_posts'),
 ]

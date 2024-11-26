@@ -20,20 +20,23 @@ def get_users(request):
 @api_view(['GET'])
 def get_user_data(request):
     requested_user_id = request.GET.get("user_id")
-    user = users.objects.filter(user_id = requested_user_id).first()
+    user = users.objects.filter(user_id=requested_user_id).first()
     
     if user:
-        json_data = {"username": user.username, 
-                     "user_id": user.user_id, 
-                     "profile_image": user.profile_image,
-                     "first_name": user.first_name,
-                     "last_name": user.last_name,
-                     "creation_date": user.creation_date,
-                     "error": False}
-        return JsonResponse(json_data, safe=False)
+        json_data = {
+            "username": user.username, 
+            "user_id": user.user_id, 
+            "profile_image": user.profile_image,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "creation_date": user.creation_date,
+            "error": False
+        }
+        return Response(json_data)
     else:
+        # Return a 404 status with DRF Response for consistency
         json_data = {"response": "User with this ID cannot be found", "error": True}
-        return JsonResponse(json_data, safe=False)
+        return Response(json_data, status=status.HTTP_404_NOT_FOUND)
     
 #AUTHENTICATE USER AND RETURN A TOKEN WITH DATA
 @api_view(['POST'])
@@ -43,16 +46,34 @@ def authenticate_user(request):
     user = users.objects.filter(username=data.get('username')).first()
 
     if user and user.password == hashlib.sha256(str(data.get('password')).encode()).hexdigest():
-        # Generate token with user_id and username, add token_id for additional use
+        # Generate token with user_id and username, token_id
+        random_token_id = randrange(1, 100000)
+        #save random token id to user
+        user.token_id = random_token_id
+        user.save()
+
         json_data = {
             "username": user.username,
             "user_id": user.user_id,  # Include user_id here
-            "token_id": randrange(1, 100000)  # Random token ID (you could replace this with a real token if needed)
+            "token_id":  random_token_id # Random token ID
         }
         return JsonResponse(json_data, safe=False, status=status.HTTP_200_OK)
     else:
         json_data = {"response": "Password was not valid", "error": True}
         return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
+
+#COMPARES USER'S TOKEN ID WITH SERVER
+@api_view(['GET'])
+def compare_token_ids(request):
+    user_id = request.GET.get("user_id")
+    local_token_id = request.GET.get("token_id")
+
+    user = users.objects.filter(user_id=user_id).first()
+
+    if (int(user.token_id) == int(local_token_id)):
+        return JsonResponse({"response": True}, safe=False, status=status.HTTP_200_OK)
+    else:
+        return JsonResponse({"response": False}, safe=False, status=status.HTTP_200_OK)
 
 #LOGIN USER
 @api_view(['GET'])
@@ -96,7 +117,8 @@ def signup_user(request):
                           password=data.get('password'),
                           first_name=data.get('first_name'),
                           last_name=data.get('last_name'),
-                          profile_image="")
+                          profile_image="",
+                          token_id=-1)
     new_user_info.save()
     json_data = {"response": "User was created", "error": False}
     return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
@@ -109,7 +131,9 @@ def search_users(request):
     matched_users = []
     for user in users.objects.all():
         if (user.username.find(query_username) != -1):
-            matched_users.append({"username": user.username, "user_id": user.user_id})
+            matched_users.append({"username": user.username, 
+                                  "user_id": user.user_id,
+                                  "profile_image": user.profile_image})
 
     if len(matched_users) > 0:
         return(Response(matched_users))
@@ -129,3 +153,5 @@ def update_settings(request):
     user.save()
 
     return HttpResponse(status=status.HTTP_200_OK)
+
+    

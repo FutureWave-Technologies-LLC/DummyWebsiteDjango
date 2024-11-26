@@ -25,7 +25,7 @@ def post(request):
             return JsonResponse(json_data, safe=False)
         else:
             json_data = {"response": "Post with this ID cannot be found", "error": True}
-            return JsonResponse(json_data, safe=False)
+            return JsonResponse(json_data, safe=False, status=status.HTTP_404_NOT_FOUND)
     #CREATE POST
     elif request.method == 'POST':
         data = request.data.copy()
@@ -53,12 +53,55 @@ def get_posts(request):
                             "creation_date": post.creation_date})
     return Response(response_set)
     
+#LIKES API
+@api_view(['GET','POST'])
+def likes_view(request):
+    #GET TOTAL LIKES AND BOOLEAN IF USER LIKED
+    if request.method == 'GET':
+        request_user_id = request.GET.get('user_id')
+        request_post_id = request.GET.get("post_id")
+        queryset = likes.objects.filter(post_id = request_post_id)
 
-#GET REPLIES
-@api_view(['GET'])
-def get_replies(request):
-    data = replies.objects.all().values()
-    return Response(list(data))
+        #Total likes
+        like_count = queryset.count()
+
+        #Did user like?
+        user_liked = False
+        query_user_like = queryset.filter(author_id = request_user_id).first()
+        if query_user_like:
+            user_liked = True
+        json_data = {"total_likes": like_count, "user_liked": user_liked} 
+        return JsonResponse(json_data, safe=False)
+    
+    #UPDATE LIKE
+    elif request.method == 'POST':
+        request_user_id = request.data.get('user_id')
+        request_post_id = request.data.get('post_id')
+
+        #Find if user liked or not
+        queryset = likes.objects.filter(post_id = request_post_id)
+        query_user_like = queryset.filter(author_id = request_user_id).first()
+
+        #User already liked, thus unlike
+        if query_user_like:
+            query_user_like.delete()
+            return Response({
+                "Liked": False,
+                "error": False,
+                "Response": f"{request_user_id} unliked post with id {request_post_id}"
+            })
+        #User did not like, thus like
+        else:
+            user = users.objects.filter(user_id = request_user_id).first()
+            post = posts.objects.filter(post_id = request_post_id).first()
+            likes.objects.create(author = user,
+                                 post = post)
+            return Response({
+                "Liked": True,
+                "error": False,
+                "Response": f"{request_user_id} liked post with id {request_post_id}"
+            })
+
 
 #COMMENTS API
 @api_view(['GET','POST'])
@@ -74,13 +117,16 @@ def get_comments(request):
                                  "profile_image": user.profile_image,
                                  "user_id": user.user_id,
                                  "comment": comment.comment,
+                                 "comment_id": comment.comment_id,
                                  "creation_date": comment.creation_date})
         return Response(comment_feed)
     #CREATE NEW COMMENT
     elif request.method == 'POST':
-        print(f'COMMENT:{request.data.get("comment")}')
-        user = users.objects.filter(user_id=request.data.get("user_id")).first()
-        post = posts.objects.filter(post_id=request.data.get("post_id")).first()
+        request_user_id = request.data.get("user_id")
+        request_post_id = request.data.get("post_id")
+
+        user = users.objects.filter(user_id= request_user_id).first()
+        post = posts.objects.filter(post_id= request_post_id).first()
         comment_info = comments(author = user,
                                 post = post,
                                 comment = request.data.get("comment"))
@@ -88,25 +134,50 @@ def get_comments(request):
         print(comment_info.pst_creation_date())
         return JsonResponse({"Response": "Commented created"}, safe=False)
 
-#GET PERSONAL PAGES
-# @api_view(['GET'])
-# def get_personal_pages(request):
-#     data = personal_pages.objects.all().values()
-#     return Response(list(data))
+#REPLIES API
+@api_view(['GET','POST'])
+def get_replies(request):
+    #GET MAIN COMMENT AND REPLIES
+    if request.method == 'GET':
+        request_comment_id = request.GET.get("comment_id")
 
-# #GET LIKES
-# @api_view(['GET'])
-# def get_likes(request):
-#     data = likes.objects.all().values()
-#     return Response(list(data))
+        comment_feed = []
+        
+        comment = comments.objects.filter(comment_id = request_comment_id).first()
+        
+        #Get main comment
+        user = users.objects.filter(user_id = comment.author.user_id).first()
+        comment_feed.append({"username": user.username,
+                                "profile_image": user.profile_image,
+                                "user_id": user.user_id,
+                                "comment": comment.comment,
+                                "comment_id": comment.comment_id,
+                                "creation_date": comment.creation_date,
+                                "main_comment": True})
+        
+        #Get replies
+        queryset = replies.objects.filter(comment_id = request_comment_id).order_by("creation_date")
+        for reply in queryset:
+            user = users.objects.filter(user_id = reply.author.user_id).first()
+            comment_feed.append({"username": user.username,
+                                "profile_image": user.profile_image,
+                                "user_id": user.user_id,
+                                "reply": reply.reply,
+                                "reply_id": reply.reply_id,
+                                "creation_date": reply.creation_date})
 
-# #UPDATE LIKES
-# @api_view(['POST'])
-# def update_likes(request):
-#     my_user = likes.objects.filter(email = "email@gmial.com").first()
-#     my_user.like_count += 1 #update like count for this user to be like_count + 1
-#     my_user.save()
-#     json_data = serializers.serialize('json', [my_user])
-#     # Return the JSON response
-#     return JsonResponse(json_data, safe=False)
-#     #from the previous user check the likes_count
+        return Response(comment_feed)
+    
+    #CREATE REPLY
+    elif request.method == 'POST':        
+        request_user_id = request.data.get("user_id")
+        request_comment_id = request.data.get("comment_id")
+        request_reply_text = request.data.get("reply")
+
+        user = users.objects.filter(user_id = request_user_id).first()
+        comment = comments.objects.filter(comment_id = request_comment_id).first()
+        
+        replies.objects.create(author = user,
+                                comment_id = comment.comment_id,
+                                reply = request_reply_text)
+        return JsonResponse({"Response": "Reply created"}, safe=False)
