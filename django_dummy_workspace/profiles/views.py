@@ -4,13 +4,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import follow
 from users.models import users
-from posts.models import posts
+from posts.models import posts, likes
 from django.http import JsonResponse
 
 # GET PROFILE POSTS
 @api_view(['GET'])
 def profile_posts(request):
     user_id = request.GET.get('user_id')
+    sort_type = request.GET.get('sort_type')
     user = users.objects.filter(user_id=user_id).first()
     
     if not user:
@@ -18,14 +19,19 @@ def profile_posts(request):
     
     response_set = []
     for post in posts.objects.filter(author=user).order_by("creation_date"):
-        response_set.append({
-            "post_id": post.post_id, 
-            "title": post.title,  
-            "description": post.description,
-            "username": post.author.username,
-            "media": post.media,
-            "creation_date": post.creation_date
-        })
+            queryset = likes.objects.filter(post_id = post.post_id)
+            post_data = {"post_id": post.post_id, 
+                                "title": post.title, 
+                                "description": post.description,
+                                "username": post.author.username,
+                                "media": post.media,
+                                "creation_date": post.creation_date}
+            if sort_type == "recent":
+                post_data["recent_like_count"] = queryset.count()
+            elif sort_type == "popular":
+                post_data["popular_like_count"] = queryset.count()
+            response_set.append(post_data)
+            
     return Response(response_set)
 
 # API FOR FOLLOWING

@@ -43,14 +43,22 @@ def post(request):
 #GET ALL POSTS DATA
 @api_view(['GET'])
 def get_posts(request):
+    sort_type = request.GET.get('sort_type')
     response_set = []
     for post in posts.objects.all().order_by("creation_date"):
-        response_set.append({"post_id": post.post_id, 
-                            "title": post.title, 
-                            "description": post.description,
-                            "username": post.author.username,
-                            "media": post.media,
-                            "creation_date": post.creation_date})
+            queryset = likes.objects.filter(post_id = post.post_id)
+            post_data = {"post_id": post.post_id, 
+                                "title": post.title, 
+                                "description": post.description,
+                                "username": post.author.username,
+                                "media": post.media,
+                                "creation_date": post.creation_date}
+            if sort_type == "recent":
+                post_data["recent_like_count"] = queryset.count()
+            elif sort_type == "popular":
+                post_data["popular_like_count"] = queryset.count()
+            response_set.append(post_data)
+
     return Response(response_set)
     
 #LIKES API
