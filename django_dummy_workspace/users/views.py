@@ -27,6 +27,8 @@ def get_user_data(request):
             "username": user.username, 
             "user_id": user.user_id, 
             "profile_image": user.profile_image,
+            "banner_image": user.banner_image,
+            "profile_description": user.profile_description,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "creation_date": user.creation_date,
@@ -150,6 +152,8 @@ def update_settings(request):
 
     #UPDATE FIELDS FOR USER
     user.profile_image = data.get('profile_image')
+    user.banner_image = data.get('banner_image')
+    user.profile_description = data.get('profile_description')
     user.save()
 
     return HttpResponse(status=status.HTTP_200_OK)
