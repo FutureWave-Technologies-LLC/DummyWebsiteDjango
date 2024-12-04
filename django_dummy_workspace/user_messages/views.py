@@ -46,7 +46,6 @@ def get_messageable_users(request):
 
     messageable_users = []
     for user in users.objects.all():
-        print(f'USERA:{user.username}')
         if (follow.objects.filter(followee_id=user_id, follower_id=user.user_id).first() 
         and follow.objects.filter(followee_id=user.user_id, follower_id=user_id).first()):
             messageable_users.append({"username": user.username, 
