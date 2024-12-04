@@ -131,7 +131,7 @@ def search_users(request):
     query_username = request.GET.get("query")
     matched_users = []
     for user in users.objects.all():
-        if (user.username.find(query_username) != -1):
+        if (user.username.lower().find(query_username) != -1):
             matched_users.append({"username": user.username, 
                                   "user_id": user.user_id,
                                   "profile_image": user.profile_image})
