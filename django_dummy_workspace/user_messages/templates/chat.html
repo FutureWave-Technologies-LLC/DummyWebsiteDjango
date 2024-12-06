@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <script>
+        const senderId = 1;  // Replace with dynamic values
+        const receiverId = 2;
+
+        const socket = new WebSocket(`ws://localhost:8000/ws/chat/${senderId}/${receiverId}/`);
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatBox = document.getElementById("chat-box");
+            const newMessage = document.createElement("div");
+            newMessage.textContent = `${data.sender_id}: ${data.message_text}`;
+            chatBox.appendChild(newMessage);
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("message-input");
+            socket.send(JSON.stringify({
+                sender_id: senderId,
+                receiver_id: receiverId,
+                message_text: input.value
+            }));
+            input.value = "";
+        }
+    </script>
+</head>
+<body>
+    <div id="chat-box" style="border: 1px solid #000; height: 300px; overflow-y: scroll;"></div>
+    <input id="message-input" type="text" placeholder="Type your message here..." />
+    <button onclick="sendMessage()">Send</button>
+</body>
+</html>

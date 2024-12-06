@@ -1,3 +1,4 @@
+'''
 from django.db import models
 from users.models import *
 from random import randrange
@@ -32,3 +33,16 @@ class user_messages(models.Model):
         return self.message_id
     def pst_creation_date(self):
         return convert_pst(self.creation_date)
+'''
+
+from django.db import models
+from users.models import users
+
+class user_messages(models.Model):
+    sender = models.ForeignKey(users, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver_id = models.IntegerField()
+    message_text = models.TextField()
+    creation_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"From {self.sender} to {self.receiver_id}: {self.message_text}"

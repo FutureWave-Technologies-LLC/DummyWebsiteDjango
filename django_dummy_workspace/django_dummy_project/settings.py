@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'posts.apps.PostsConfig',
     'users.apps.UsersConfig',
+    'user_messages',
     'user_messages.apps.UserMessagesConfig',
     'profiles.apps.ProfilesConfig'
 ]
@@ -97,6 +98,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_dummy_project.wsgi.application'
 ASGI_APPLICATION = 'django_dummy_project.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

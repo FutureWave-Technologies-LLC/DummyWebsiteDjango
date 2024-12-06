@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,7 +10,7 @@ from django.http import JsonResponse
 from users.models import users
 from .serializers import MessageSerializer
 from random import randrange
-
+'''
 #USER MESSAGES
 @api_view(['GET','POST'])
 def messages(request):
@@ -37,3 +38,35 @@ def messages(request):
         #     serializer.save()
         #     return Response(serializer.data, status=status.HTTP_201_CREATED)
         # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+'''
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import user_messages
+from .serializers import MessageSerializer
+from users.models import users
+from django.db.models import Q
+
+@api_view(['GET', 'POST'])
+def messages(request):
+    if request.method == 'GET':
+        sender_id = request.GET.get("sender_id")
+        receiver_id = request.GET.get("receiver_id")
+        
+        # Fetch messages between the two users
+        queryset = user_messages.objects.filter(
+            Q(sender=sender_id, receiver_id=receiver_id) |
+            Q(sender=receiver_id, receiver_id=sender_id)
+        ).order_by('creation_date')
+        serializer = MessageSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        sender = users.objects.filter(user_id=request.data.get("sender_id")).first()
+        new_message = user_messages(
+            sender=sender,
+            receiver_id=request.data.get("receiver_id"),
+            message_text=request.data.get("message_text")
+        )
+        new_message.save()
+        return Response({"Response": "Message sent"}, status=201)
