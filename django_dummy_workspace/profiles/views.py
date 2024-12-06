@@ -4,13 +4,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import follow
 from users.models import users
-from posts.models import posts
+from posts.models import posts, likes
 from django.http import JsonResponse
 
 # GET PROFILE POSTS
 @api_view(['GET'])
 def profile_posts(request):
     user_id = request.GET.get('user_id')
+    sort_type = request.GET.get('sort_type')
     user = users.objects.filter(user_id=user_id).first()
     
     if not user:
@@ -18,19 +19,25 @@ def profile_posts(request):
     
     response_set = []
     for post in posts.objects.filter(author=user).order_by("creation_date"):
-        response_set.append({
-            "post_id": post.post_id, 
-            "title": post.title,  
-            "description": post.description,
-            "username": post.author.username,
-            "media": post.media,
-            "creation_date": post.creation_date
-        })
+            queryset = likes.objects.filter(post_id = post.post_id)
+            post_data = {"post_id": post.post_id, 
+                                "title": post.title, 
+                                "description": post.description,
+                                "username": post.author.username,
+                                "media": post.media,
+                                "creation_date": post.creation_date}
+            if sort_type == "recent":
+                post_data["recent_like_count"] = queryset.count()
+            elif sort_type == "popular":
+                post_data["popular_like_count"] = queryset.count()
+            response_set.append(post_data)
+            
     return Response(response_set)
 
 # API FOR FOLLOWING
 @api_view(['GET', 'POST'])
 def following(request):
+    #FOLLOW/UNFOLLOW
     if request.method == 'POST':
         data = request.data
         followee_username = data.get("followee_username")
@@ -77,17 +84,21 @@ def following(request):
                 "Response": f"{follower_id} followed {followee_user.user_id} ({followee_user.username})"
             })
 
+    #FIND IF USER FOLLOWED BASED ON FOLLOWEE_ID 
     elif request.method == 'GET':
         user_id = request.GET.get("user_id")
+        followee_id = request.GET.get("followee_id")
         follower_user = users.objects.filter(user_id=user_id).first()
 
         if not follower_user:
             return Response({"error": "Follower does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
         followings = follow.objects.filter(follower=follower_user)
-        followings_list = [{"username": followee.username, "user_id": followee.user_id} for follow in followings for followee in users.objects.filter(user_id=follow.followee_id)]
+        for following in followings:
+            if following.followee_id == int(followee_id):
+                return Response(True)
         
-        return Response(followings_list)
+        return Response(False)
 
 
 # API FOR GETTING A USER'S FOLLOWERS
@@ -103,3 +114,18 @@ def get_followers(request):
     followers_list = [{"username": follower.username, "user_id": follower.user_id} for follower in users.objects.filter(user_id__in=[f.follower_id for f in followers])]
     
     return Response(followers_list)
+
+#seperated from "following" view 
+# API FOR GETTING A USER'S FOLLOWEES
+@api_view(['GET'])
+def get_followees(request):
+    user_id = request.GET.get("user_id")
+    follower_user = users.objects.filter(user_id=user_id).first()
+
+    if not follower_user:
+        return Response({"error": "Follower does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+    followings = follow.objects.filter(follower=follower_user)
+    followings_list = [{"username": followee.username, "user_id": followee.user_id} for follow in followings for followee in users.objects.filter(user_id=follow.followee_id)]
+    
+    return Response(followings_list)

@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 # from django.contrib import messages
 from users.models import users
+from profiles.models import follow
 from .serializers import MessageSerializer
 from random import randrange
 '''
