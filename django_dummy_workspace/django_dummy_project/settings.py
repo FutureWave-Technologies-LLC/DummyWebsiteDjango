@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'posts.apps.PostsConfig',
     'users.apps.UsersConfig',
-    'user_messages',
     'user_messages.apps.UserMessagesConfig',
     'profiles.apps.ProfilesConfig'
 ]
