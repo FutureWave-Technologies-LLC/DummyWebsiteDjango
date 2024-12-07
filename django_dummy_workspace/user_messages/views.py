@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 # from django.contrib import messages
 from users.models import users
+from profiles.models import follow
 from .serializers import MessageSerializer
 from random import randrange
 '''
@@ -70,3 +71,18 @@ def messages(request):
         )
         new_message.save()
         return Response({"Response": "Message sent"}, status=201)
+
+#GET USERS THAT CAN BE MESSAGED
+@api_view(['GET'])
+def get_messageable_users(request):
+    user_id = request.GET.get("user_id")
+
+    messageable_users = []
+    for user in users.objects.all():
+        if (follow.objects.filter(followee_id=user_id, follower_id=user.user_id).first() 
+        and follow.objects.filter(followee_id=user.user_id, follower_id=user_id).first()):
+            messageable_users.append({"username": user.username, 
+                                    "user_id": user.user_id,
+                                    "profile_image": user.profile_image})
+
+    return Response(messageable_users)

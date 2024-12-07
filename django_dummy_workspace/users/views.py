@@ -27,6 +27,8 @@ def get_user_data(request):
             "username": user.username, 
             "user_id": user.user_id, 
             "profile_image": user.profile_image,
+            "banner_image": user.banner_image,
+            "profile_description": user.profile_description,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "creation_date": user.creation_date,
@@ -110,7 +112,6 @@ def signup_user(request):
         return JsonResponse(json_data, safe=False)
     
     #hash password
-    # print(f'RAW PASSWORD:{data['password']}')
     data['password'] = hashlib.sha256(str(data.get('password')).encode()).hexdigest()
     
     new_user_info = users(username=data.get('username'),
@@ -130,7 +131,7 @@ def search_users(request):
     query_username = request.GET.get("query")
     matched_users = []
     for user in users.objects.all():
-        if (user.username.find(query_username) != -1):
+        if (user.username.lower().find(query_username) != -1):
             matched_users.append({"username": user.username, 
                                   "user_id": user.user_id,
                                   "profile_image": user.profile_image})
@@ -150,8 +151,23 @@ def update_settings(request):
 
     #UPDATE FIELDS FOR USER
     user.profile_image = data.get('profile_image')
+    user.banner_image = data.get('banner_image')
+    user.profile_description = data.get('profile_description')
+
+    json_data = {}
+    #UPDATE PASSWORD IF OLD PASSWORD MATCH
+    if data.get('old_password') and data.get('new_password'):
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+        print(old_password, new_password)
+        if user.password == hashlib.sha256(str(old_password).encode()).hexdigest():
+            user.password = hashlib.sha256(str(new_password).encode()).hexdigest()
+            json_data["password_update"] = True
+        else:
+            json_data["password_update"] = False
+            
     user.save()
 
-    return HttpResponse(status=status.HTTP_200_OK)
+    return JsonResponse(json_data, safe=False, status=status.HTTP_200_OK)
 
     
