@@ -1,4 +1,5 @@
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import user_messages
 from users.models import users
@@ -29,7 +30,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         await self.send(text_data=json.dumps(event))
 '''
-
+logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -42,9 +43,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        logger.info(f"WebSocket connection attempt: {self.scope['url_route']['kwargs']}")
         await self.accept()
 
     async def disconnect(self, close_code):
+        logger.info("WebSocket disconnected.")
         # Leave the chat room
         await self.channel_layer.group_discard(
             self.room_group_name,
