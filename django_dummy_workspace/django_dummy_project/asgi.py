@@ -38,6 +38,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_dummy_project.settings')
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter(websocket_urlpatterns)
+        URLRouter(
+            websocket_urlpatterns
+        )
     ),
 })
