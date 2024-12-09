@@ -1,10 +1,7 @@
 from rest_framework import serializers
-from .models import Message
+from .models import user_messages
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender_id = serializers.IntegerField(source='sender.id')  
-    receiver_id = serializers.IntegerField(source='receiver.id')  
-
     class Meta:
-        model = Message
-        fields = ['sender_id', 'receiver_id', 'message_text']
+        model = user_messages
+        fields = ('message_id', 'sender', 'receiver_id', 'message_text')
