@@ -37,7 +37,6 @@ def profile_posts(request):
 # API FOR FOLLOWING
 @api_view(['GET', 'POST'])
 def following(request):
-    #FOLLOW/UNFOLLOW
     if request.method == 'POST':
         data = request.data
         followee_username = data.get("followee_username")
