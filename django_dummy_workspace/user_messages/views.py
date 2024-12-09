@@ -28,7 +28,11 @@ def messages(request):
         ).order_by('creation_date')
         #print(queryset)
         serializer = MessageSerializer(queryset, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        for message in data:
+            message['sender_id'] = int(message['sender'])
+        
+        return Response(data)
 
     # elif request.method == 'POST':
     #     sender = users.objects.filter(user_id=request.data.get("sender_id")).first()
