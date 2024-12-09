@@ -14,7 +14,7 @@ from .serializers import MessageSerializer
 from random import randrange
 from django.db.models import Q
 
-#GET MESSAGES
+#GET MESSAGES BETWEEN TWO USERS
 @api_view(['GET'])
 def messages(request):
     if request.method == 'GET':
@@ -33,16 +33,6 @@ def messages(request):
             message['sender_id'] = int(message['sender'])
         
         return Response(data)
-
-    # elif request.method == 'POST':
-    #     sender = users.objects.filter(user_id=request.data.get("sender_id")).first()
-    #     new_message = user_messages(
-    #         sender=sender,
-    #         receiver_id=request.data.get("receiver_id"),
-    #         message_text=request.data.get("message_text")
-    #     )
-    #     new_message.save()
-    #     return Response({"Response": "Message sent"}, status=201)
 
 #GET USERS THAT CAN BE MESSAGED
 @api_view(['GET'])
