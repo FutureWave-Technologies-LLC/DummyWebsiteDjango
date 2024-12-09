@@ -139,7 +139,6 @@ def get_comments(request):
                                 post = post,
                                 comment = request.data.get("comment"))
         comment_info.save()
-        print(comment_info.pst_creation_date())
         return JsonResponse({"Response": "Commented created"}, safe=False)
 
 #REPLIES API
