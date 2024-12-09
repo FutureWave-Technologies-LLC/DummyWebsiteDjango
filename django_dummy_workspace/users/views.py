@@ -89,7 +89,7 @@ def login_user(request):
         json_data = {"response": "Invalid Username", "error": True}
         return JsonResponse(json_data, safe=False)
     
-    # if user.password != request_password:
+    #compare password
     if user.password != hashlib.sha256(str(request_password).encode()).hexdigest():
         json_data = {"response": "Invalid Password", "error": True}
         return JsonResponse(json_data, safe=False)
@@ -105,11 +105,11 @@ def signup_user(request):
     if user:
         # Return JSON that username is taken
         json_data = {"response": "Username already exists.", "error": True}
-        return JsonResponse(json_data, safe=False)
+        return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
     if len(data.get('password')) < 4:
         # Return JSON that invalid password
         json_data = {"response": "Password must be more than 4 characters long.", "error": True}
-        return JsonResponse(json_data, safe=False)
+        return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
     
     #hash password
     data['password'] = hashlib.sha256(str(data.get('password')).encode()).hexdigest()
@@ -159,12 +159,15 @@ def update_settings(request):
     if data.get('old_password') and data.get('new_password'):
         old_password = data.get('old_password')
         new_password = data.get('new_password')
-        print(old_password, new_password)
-        if user.password == hashlib.sha256(str(old_password).encode()).hexdigest():
+        if user.password != hashlib.sha256(str(old_password).encode()).hexdigest():
+            json_data["password_update"] = False
+            json_data["error"] = "Old password is incorrect"
+        elif len(data.get('new_password')) < 4:
+             json_data["password_update"] = False
+             json_data["error"] = "New password must have at least 4 characters."
+        else:
             user.password = hashlib.sha256(str(new_password).encode()).hexdigest()
             json_data["password_update"] = True
-        else:
-            json_data["password_update"] = False
             
     user.save()
 
