@@ -60,11 +60,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'error': 'Sender or receiver user not found.'
             }))
             return
-        # user_messages.objects.create(
-        #     sender=sender,
-        #     receiver_id=receiver_id,
-        #     message_text=message_text
-        # )
 
         # Send the message to the group
         await self.channel_layer.group_send(
