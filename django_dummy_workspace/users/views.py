@@ -101,30 +101,15 @@ def login_user(request):
 @api_view(['POST'])
 def signup_user(request):
     data = request.data
-    user = users.objects.filter(username=data.get('username')).first()
-    if user:
-        # Return JSON that username is taken
-        json_data = {"response": "Username already exists.", "error": True}
-        return JsonResponse(json_data, safe=False)
-    if len(data.get('password')) < 4:
-        # Return JSON that invalid password
-        json_data = {"response": "Password must be more than 4 characters long.", "error": True}
-        return JsonResponse(json_data, safe=False)
-    
-    #hash password
-    data['password'] = hashlib.sha256(str(data.get('password')).encode()).hexdigest()
-    
-    new_user_info = users(username=data.get('username'),
-                          password=data.get('password'),
-                          first_name=data.get('first_name'),
-                          last_name=data.get('last_name'),
-                          profile_image="",
-                          token_id=-1)
-    new_user_info.save()
-    json_data = {"response": "User was created", "error": False}
-    return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
-        
 
+    try:
+        user = UserFactory.create_user(data)
+        json_data = {"response": "User was created", "error": False}
+        return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
+    except ValueError as e:
+        json_data = {"response": str(e), "error": True}
+        return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
+        
 #SEARCH FOR USERS VIA SEARCHBAR
 @api_view(['GET'])
 def search_users(request):
