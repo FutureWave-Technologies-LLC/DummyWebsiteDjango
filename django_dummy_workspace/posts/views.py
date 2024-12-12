@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from random import randrange
 from .serializers import *
+from .factory import *
 
 #API FOR CREATE OR GET A POST
 @api_view(['GET','POST'])
@@ -28,17 +29,13 @@ def post(request):
             return JsonResponse(json_data, safe=False, status=status.HTTP_404_NOT_FOUND)
     #CREATE POST
     elif request.method == 'POST':
-        data = request.data.copy()
-    
-        user = users.objects.filter(user_id=data.get('user_id')).first()
-
-        my_post_info = posts(author = user,   
-                             title = data.get('title'),
-                             description = data.get('description'),
-                             media = data.get('media'))
-        my_post_info.save()
-        json_data = {"Response": "Post was created", "error": False}
-        return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
+        try:
+            AbstractFactory.create_post(request)
+            json_data = {"Response": "Post was created", "error": False}
+            return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            json_data = {"response": str(e), "error": True}
+            return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
 
 #GET ALL POSTS DATA
 @api_view(['GET'])
@@ -100,16 +97,11 @@ def likes_view(request):
             })
         #User did not like, thus like
         else:
-            user = users.objects.filter(user_id = request_user_id).first()
-            post = posts.objects.filter(post_id = request_post_id).first()
-            likes.objects.create(author = user,
-                                 post = post)
-            return Response({
-                "Liked": True,
-                "error": False,
-                "Response": f"{request_user_id} liked post with id {request_post_id}"
-            })
-
+            try:
+                AbstractFactory.create_like(request)
+                return Response({"Liked": True, "error": False, "Response": f"{request_user_id} liked post with id {request_post_id}"})
+            except ValueError as e:
+                return JsonResponse({"response": str(e), "error": True}, safe=False, status=status.HTTP_400_BAD_REQUEST)            
 
 #COMMENTS API
 @api_view(['GET','POST'])
@@ -130,17 +122,13 @@ def get_comments(request):
         return Response(comment_feed)
     #CREATE NEW COMMENT
     elif request.method == 'POST':
-        request_user_id = request.data.get("user_id")
-        request_post_id = request.data.get("post_id")
-
-        user = users.objects.filter(user_id= request_user_id).first()
-        post = posts.objects.filter(post_id= request_post_id).first()
-        comment_info = comments(author = user,
-                                post = post,
-                                comment = request.data.get("comment"))
-        comment_info.save()
-        print(comment_info.pst_creation_date())
-        return JsonResponse({"Response": "Commented created"}, safe=False)
+        try:
+            AbstractFactory.create_comment(request)
+            print(comment_info.pst_creation_date())
+            return JsonResponse({"Response": "Commented created"}, safe=False)
+        except ValueError as e:
+            json_data = {"response": str(e), "error": True}
+            return JsonResponse(json_data, safe=False, status=status.HTTP_400_BAD_REQUEST)
 
 #REPLIES API
 @api_view(['GET','POST'])
@@ -178,14 +166,9 @@ def get_replies(request):
     
     #CREATE REPLY
     elif request.method == 'POST':        
-        request_user_id = request.data.get("user_id")
-        request_comment_id = request.data.get("comment_id")
-        request_reply_text = request.data.get("reply")
-
-        user = users.objects.filter(user_id = request_user_id).first()
-        comment = comments.objects.filter(comment_id = request_comment_id).first()
+        try:
+            AbstractFactory.create_reply(request)
+            return JsonResponse({"Response": "Reply created"}, safe=False)
+        except ValueError as e:
+            return JsonResponse({"response": str(e), "error": True})
         
-        replies.objects.create(author = user,
-                                comment_id = comment.comment_id,
-                                reply = request_reply_text)
-        return JsonResponse({"Response": "Reply created"}, safe=False)

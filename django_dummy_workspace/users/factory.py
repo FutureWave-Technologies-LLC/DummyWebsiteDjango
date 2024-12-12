@@ -3,7 +3,9 @@ import hashlib
 
 class UserFactory:
     @staticmethod
-    def create_user(data):
+    def create_user(request):
+        data = request.data
+
         # Check if user already exists
         if users.objects.filter(username=data.get('username')).first():
             # Return JSON that username is taken

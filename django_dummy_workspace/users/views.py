@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from random import randrange
 import hashlib
+from .factory import *
 
 
 #GET ALL DATA FROM 'USERS' MODEL 
@@ -100,10 +101,8 @@ def login_user(request):
 # SIGN-UP USER
 @api_view(['POST'])
 def signup_user(request):
-    data = request.data
-
     try:
-        user = UserFactory.create_user(data)
+        UserFactory.create_user(request)
         json_data = {"response": "User was created", "error": False}
         return JsonResponse(json_data, safe=False, status=status.HTTP_201_CREATED)
     except ValueError as e:
