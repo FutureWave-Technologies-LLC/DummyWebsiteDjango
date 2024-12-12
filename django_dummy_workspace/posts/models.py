@@ -4,34 +4,6 @@ from random import randrange
 # pip install pytz
 import pytz
 
-def generate_post_id():
-    while True:
-        id = randrange(0, 999999)
-        if posts.objects.filter(post_id = id).count() == 0:
-            break
-    return id
-
-def likes_id():
-    while True:
-        id = randrange(0, 999999)
-        if likes.objects.filter(like_id = id).count() == 0:
-            break
-    return id
-
-def generate_comments_id():
-    while True:
-        id = randrange(0, 999999)
-        if comments.objects.filter(comment_id = id).count() == 0:
-            break
-    return id
-
-def generate_replies_id():
-    while True:
-        id = randrange(0, 999999)
-        if replies.objects.filter(reply_id = id).count() == 0:
-            break
-    return id
-
 def convert_pst(time):
     if time.tzinfo is None:
         time = pytz.utc.localize(time)
@@ -45,10 +17,9 @@ class posts(models.Model):
     description = models.CharField(max_length=500, null=False)
     media = models.CharField(max_length=255, null=True)
     
-    post_id = models.IntegerField(primary_key=True, 
+    post_id = models.AutoField(primary_key=True, 
                                   null=False,
-                                  unique= True,
-                                  default=generate_post_id)
+                                  unique= True)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
@@ -60,10 +31,10 @@ class likes(models.Model):
     author = models.ForeignKey(users, on_delete=models.CASCADE)
     post = models.ForeignKey(posts, on_delete=models.CASCADE)
 
-    like_id = models.IntegerField(primary_key=True,
+    like_id = models.AutoField(primary_key=True,
                                       null=False, 
-                                      unique=True,
-                                      default=likes_id)
+                                      unique=True)
+
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
@@ -77,10 +48,9 @@ class comments(models.Model):
 
     comment = models.CharField(max_length=256, null=False)
 
-    comment_id = models.IntegerField(primary_key=True,
+    comment_id = models.AutoField(primary_key=True,
                                       null=False, 
-                                      unique=True,
-                                      default=generate_comments_id)
+                                      unique=True)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def str(self):
@@ -92,10 +62,9 @@ class replies(models.Model):
     author = models.ForeignKey(users, on_delete=models.CASCADE)
     comment = models.ForeignKey(comments, on_delete=models.CASCADE)
 
-    reply_id = models.IntegerField(primary_key=True,
+    reply_id = models.AutoField(primary_key=True,
                                       null=False, 
-                                      unique=True,
-                                      default=generate_replies_id)
+                                      unique=True)
 
     reply = models.CharField(max_length=255, null=False)
 

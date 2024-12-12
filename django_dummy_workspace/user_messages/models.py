@@ -3,13 +3,6 @@ from users.models import *
 from random import randrange
 import pytz
 
-def generate_message_id():
-    while True:
-        id = randrange(0, 9999999)
-        if user_messages.objects.filter(message_id = id).count() == 0:
-            break
-    return id
-
 def convert_pst(time):
     if time.tzinfo is None:
         time = pytz.utc.localize(time)
@@ -19,10 +12,9 @@ def convert_pst(time):
 class user_messages(models.Model):
     sender = models.ForeignKey(users, on_delete=models.CASCADE, default=None)
 
-    message_id = models.IntegerField(primary_key=True,
+    message_id = models.AutoField(primary_key=True,
                                       null=False, 
-                                      unique=True,
-                                      default=generate_message_id)
+                                      unique=True)
     receiver_id = models.IntegerField(null=False)
     message_text = models.CharField(max_length=255, null=False)
 
