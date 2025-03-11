@@ -116,7 +116,7 @@ DATABASES = {
         'NAME': 'FutureWaveTechDB',
         'USER': 'admin',
         'PASSWORD': 'mjNRFl0z7tFQalVNzW22',
-        'HOST': 'database-1.cdcgakg6ippm.us-east-2.rds.amazonaws.com',
+        'HOST': 'new-space.c34u0w2awm4m.us-east-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
